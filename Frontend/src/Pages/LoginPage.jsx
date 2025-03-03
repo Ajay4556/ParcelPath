@@ -13,6 +13,8 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { FaFacebookF } from "react-icons/fa";
 import { Link } from "react-router";
 import { api } from "../API/api.js";
+import { Footer } from "../Shared/Footer.jsx";
+import { toast } from "react-toastify";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -22,7 +24,7 @@ const LoginPage = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [errors, setErrors] = useState({}); // Add this line
+  const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
 
   const handleInputChange = (e) => {
@@ -50,8 +52,13 @@ const LoginPage = () => {
 
       // Login successful
       const data = response.data;
-      localStorage.setItem("token", data.token);
-      window.location.href = "/dashboard";
+      if (data.message) {
+        toast.success(data.message);
+      }
+      setTimeout(() => {
+        localStorage.setItem("token", data.token);
+        window.location.href = "/dashboard";
+      }, 4000);
     } catch (error) {
       setLoading(false);
       if (error.response && error.response.data) {
@@ -130,7 +137,6 @@ const LoginPage = () => {
           position="relative"
           mx={2}
         >
-          {/* w */}
           <Typography
             variant="h4"
             fontWeight="bold"
@@ -141,10 +147,8 @@ const LoginPage = () => {
             Login
           </Typography>
           <Box mb={3}>
-            {/* Google and Facebook Buttons */}
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
-                {/* Google Button */}
                 <Button
                   variant="contained"
                   fullWidth

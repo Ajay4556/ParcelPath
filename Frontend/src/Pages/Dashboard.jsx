@@ -1,9 +1,36 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Navbar } from "../Shared/Navbar";
 import { Footer } from "../Shared/Footer";
 import { api } from "../API/api.js";
+import { Box, Typography } from "@mui/material";
+import { Link } from "react-router";
 const Dashboard = () => {
   const [deliveries, setDeliveries] = React.useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const checkCookie = (name) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return true;
+      else return false;
+    };
+
+    const isSessionTokenPresent = checkCookie("authjs.session-token");
+    setIsLoggedIn(isSessionTokenPresent);
+  }, []);
+
+  const handleLogout = () => {
+    document.cookie =
+      "authjs.session-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    setIsLoggedIn(false);
+    window.location.href = "/";
+  };
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
 
   const getDeliveries = async () => {
     const response = await api.get("/delivery/recent-deliveries");
@@ -14,35 +41,199 @@ const Dashboard = () => {
   useEffect(() => {
     getDeliveries();
   }, []);
+
   return (
     <div className="font-sans">
       {/* Hero Section with Navbar */}
       <div
-        className="relative h-[600px] bg-cover bg-center text-white"
+        className="relative min-h-screen bg-cover bg-center text-white flex flex-col"
         style={{ backgroundImage: "url('Assets/Images/image.png')" }}
       >
-        <Navbar />
-        <div className="flex items-center justify-start h-full pl-10">
+        <nav
+          className="flex justify-between items-center p-4 bg-transparent absolute w-full"
+          style={{ fontFamily: "Poppins, sans-serif" }}
+        >
+          <Box display="flex" alignItems="center">
+            <img
+              src="Assets/Images/logo.png"
+              alt="Logo"
+              style={{ height: "50px", marginRight: "16px" }}
+            />
+            <Typography
+              variant="h5"
+              fontWeight="Regular"
+              color="white"
+              style={{ fontFamily: "'Kaushan Script', cursive" }}
+            >
+              PARCELPATH
+            </Typography>
+          </Box>
+
+          {/* Hamburger Menu Icon for Mobile */}
+          <div className="md:hidden flex items-center">
+            <button
+              onClick={toggleMenu}
+              className="text-white focus:outline-none"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                {isMenuOpen ? (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                ) : (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                )}
+              </svg>
+            </button>
+          </div>
+
+          {/* Navigation Links */}
+          <ul className="hidden md:flex space-x-6">
+            <li>
+              <Link to="/" className="text-white hover:text-orange-500">
+                Home
+              </Link>
+            </li>
+            <li>
+              <Link to="/posttrip" className="text-white hover:text-orange-500">
+                Post Trip
+              </Link>
+            </li>
+            <li>
+              <Link to="/findtrip" className="text-white hover:text-orange-500">
+                Find Trip
+              </Link>
+            </li>
+          </ul>
+
+          {/* Authentication Buttons */}
+          <div className="hidden md:flex space-x-4">
+            {isLoggedIn ? (
+              <button
+                onClick={handleLogout}
+                className="text-white hover:text-orange-500"
+              >
+                Logout
+              </button>
+            ) : (
+              <>
+                <Link to="/login">
+                  <button className="text-white hover:text-orange-500">
+                    Login
+                  </button>
+                </Link>
+                <Link to="/signup">
+                  <button className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600">
+                    Sign Up
+                  </button>
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* Mobile Menu */}
+          {isMenuOpen && (
+            <div className="absolute top-full left-0 w-full bg-gray-800 text-white md:hidden z-10">
+              <ul className="flex flex-col items-center space-y-4 py-4">
+                <li>
+                  <Link
+                    to="/"
+                    className="hover:text-orange-500"
+                    onClick={toggleMenu}
+                  >
+                    Home
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/posttrip"
+                    className="hover:text-orange-500"
+                    onClick={toggleMenu}
+                  >
+                    Post Trip
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/findtrip"
+                    className="hover:text-orange-500"
+                    onClick={toggleMenu}
+                  >
+                    Find Trip
+                  </Link>
+                </li>
+
+                <li className="w-full border-t border-gray-700"></li>
+                {isLoggedIn ? (
+                  <li>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        toggleMenu();
+                      }}
+                      className="hover:text-orange-500"
+                    >
+                      Logout
+                    </button>
+                  </li>
+                ) : (
+                  <>
+                    <li>
+                      <Link
+                        to="/login"
+                        className="hover:text-orange-500"
+                        onClick={toggleMenu}
+                      >
+                        Login
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/signup" onClick={toggleMenu}>
+                        <button className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600">
+                          Sign Up
+                        </button>
+                      </Link>
+                    </li>
+                  </>
+                )}
+              </ul>
+            </div>
+          )}
+        </nav>
+        <div className="flex flex-grow items-center justify-start px-4 md:px-10">
           <div
-            className="max-w-2xl p-8 rounded-md"
+            className="max-w-2xl p-4 md:p-8 rounded-md"
             style={{ fontFamily: "Poppins, sans-serif" }}
           >
             <h1
-              className="text-4xl font-bold leading-tight"
-              style={{ fontFamily: "Poppins, sans-serif", width: "700px" }}
+              className="text-3xl sm:text-4xl font-bold leading-tight"
+              style={{ fontFamily: "Poppins, sans-serif" }}
             >
               "Connecting You to Reliable Delivery Providers for Seamless Parcel
               Transport"
             </h1>
             <p
-              className="mt-4 text-lg"
-              style={{ fontFamily: "Poppins, sans-serif", width: "560px" }}
+              className="mt-4 text-base sm:text-lg"
+              style={{ fontFamily: "Poppins, sans-serif" }}
             >
               Flexible, affordable, and convenient delivery solutions tailored
               to your needs.
             </p>
             <button className="mt-6 bg-orange-500 text-white px-6 py-3 rounded-md hover:bg-orange-600 font-bold">
-              Post Trip
+              Book Trip
             </button>
           </div>
         </div>
@@ -55,7 +246,7 @@ const Dashboard = () => {
       >
         <h2 className="text-2xl font-bold text-center">How It Works</h2>
         <div className="w-16 h-1 bg-orange-500 mt-2 mb-6 mx-auto"></div>
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto px-4">
           {[
             {
               id: "01",
@@ -81,20 +272,17 @@ const Dashboard = () => {
                 {item.id}
               </span>
               <h3 className="text-lg font-bold mt-2">{item.title}</h3>
-              <p className="text-gray-600 mt-1">{item.desc}</p>
+              <p className="text-white-600 mt-1">{item.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Why Choose Us Section */}
-      <section
-        className="py-16 text-center"
-        style={{ fontFamily: "Poppins, sans-serif" }}
-      >
-        <h2 className="text-2xl font-bold">Why Choose Us</h2>
+      <section className="py-16" style={{ fontFamily: "Poppins, sans-serif" }}>
+        <h2 className="text-2xl font-bold text-center">Why Choose Us</h2>
         <div className="w-16 h-1 bg-orange-500 mt-2 mb-6 mx-auto"></div>
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-8 max-w-5xl mx-auto">
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto px-4">
           {[
             {
               icon: "Assets/Images/wcu_icons/fastandeasy.png",
@@ -127,7 +315,7 @@ const Dashboard = () => {
                 className="w-18 h-16 mb-4"
               />
               <h3 className="text-lg font-bold text-left">{item.title}</h3>
-              <p className="text-gray-600 mt-1 text-left">{item.desc}</p>
+              <p className="text-white-600 mt-1 text-left">{item.desc}</p>
             </div>
           ))}
         </div>
@@ -135,12 +323,12 @@ const Dashboard = () => {
 
       {/* Recent Delivery Section */}
       <section
-        className="py-16 text-center bg-gray-100"
+        className="py-16 text-center bg-white-100"
         style={{ fontFamily: "Poppins, sans-serif" }}
       >
         <h2 className="text-2xl font-bold">Recent Delivery</h2>
         <div className="w-16 h-1 bg-orange-500 mt-2 mb-6 mx-auto"></div>
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-6xl mx-auto px-4">
           {deliveries.map((item, index) => (
             <div
               key={index}
@@ -153,7 +341,7 @@ const Dashboard = () => {
               />
               <div className="p-4 mb-8 ml-4">
                 <h3 className="text-lg text-left font-bold">{item.title}</h3>
-                <div className="text-gray-600 flex items-center mt-2">
+                <div className="text-white-600 flex items-center mt-2">
                   <img
                     src="/Assets/Images/icons/normal_location.png"
                     alt="location"
@@ -161,7 +349,7 @@ const Dashboard = () => {
                   />
                   {item.from}
                 </div>
-                <div className="text-gray-600 flex items-center mt-1">
+                <div className="text-white-600 flex items-center mt-1">
                   <img
                     src="/Assets/Images/icons/bold_location.png"
                     alt="location"
@@ -170,7 +358,7 @@ const Dashboard = () => {
                   {item.to}
                 </div>
               </div>
-              <div className="absolute bottom-0 right-0  text-white bg-gray-800 w-1/3 h-10 flex items-center justify-center rounded">
+              <div className="absolute bottom-0 right-0 text-white bg-white-800 w-1/3 h-10 flex items-center justify-center rounded-tl-lg">
                 {item.price}
               </div>
             </div>
@@ -178,32 +366,33 @@ const Dashboard = () => {
         </div>
       </section>
 
+      {/* Call to Action Section */}
       <section
-        className="relative flex flex-col items-center text-center bg-[#fdfaf6] p-10 rounded-2xl shadow-md"
+        className="relative flex flex-col items-center text-center bg-[#fdfaf6] p-10 rounded-2xl shadow-md mx-4 my-10 overflow-hidden"
         style={{ fontFamily: "Poppins, sans-serif" }}
       >
         <img
           src="Assets/Images/abstract/abstract.png"
           alt="Abstract Design"
-          className="absolute top-0 left-0 w-32 h-32 rotate-180"
+          className="absolute top-0 left-0 w-20 h-20 md:w-32 md:h-32 rotate-180 hidden sm:block"
         />
         <img
           src="Assets/Images/abstract/abstract.png"
           alt="Abstract Design"
-          className="absolute bottom-0 right-0 w-32 h-32 transform "
+          className="absolute bottom-0 right-0 w-20 h-20 md:w-32 md:h-32 transform hidden sm:block"
         />
-        <h2 className="text-2xl font-bold text-gray-900">
+        <h2 className="text-2xl font-bold text-white-900">
           "Choose Your Role and Get Started!"
         </h2>
         <div className="w-16 h-1 bg-orange-500 mt-2 mb-4"></div>
-        <p className="text-gray-700 max-w-2xl mb-6">
+        <p className="text-white-700 max-w-2xl mb-6 px-4">
           "Our platform is your one-stop solution for seamless delivery
           connections. Whether you're looking to find a trusted provider for
           your parcel or want to maximize your trip by offering delivery
           services, we've got you covered. Choose your role and start your
           journey today!"
         </p>
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-4">
           <button className="bg-orange-500 text-white font-semibold py-2 px-6 rounded-lg shadow-md hover:bg-orange-600">
             Post Your Delivery Trip
           </button>
@@ -215,12 +404,12 @@ const Dashboard = () => {
 
       {/* Testimonials */}
       <section
-        className="flex flex-col items-center text-center bg-white  mt-10"
+        className="flex flex-col items-center text-center bg-white mt-10"
         style={{ fontFamily: "Poppins, sans-serif" }}
       >
-        <h2 className="text-2xl font-bold text-gray-900">Testimonials</h2>
+        <h2 className="text-2xl font-bold text-white-900">Testimonials</h2>
         <div className="w-16 h-1 bg-orange-500 mt-2 mb-6"></div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl px-4">
           {[
             {
               text: "This platform made it so easy to find a trustworthy provider. My parcel arrived on time and in perfect condition!",
@@ -240,7 +429,7 @@ const Dashboard = () => {
           ].map((testimonial, index) => (
             <div
               key={index}
-              className="border rounded-lg shadow-md  bg-[#fdfaf6] flex flex-col justify-between h-full "
+              className="border rounded-lg shadow-md bg-[#fdfaf6] flex flex-col justify-between h-full"
             >
               <div>
                 <div className="flex justify-start">

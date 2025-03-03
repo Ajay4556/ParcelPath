@@ -8,33 +8,56 @@ import {
   InputAdornment,
   TextField,
   Typography,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  FormLabel,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { FaFacebookF } from "react-icons/fa";
 import { Link } from "react-router";
 import { api } from "../API/api.js";
+import { toast } from "react-toastify";
 
 const Registration = () => {
+  // Add phonenumber, city, and address to the formData state
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     password: "",
+    phonenumber: "",
+    city: "",
+    address: "",
+    role: "",
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [errors, setErrors] = useState({}); // Add this line
+  const [errors, setErrors] = useState({});
 
   const [showPassword, setShowPassword] = useState(false);
+
+  // Use Material-UI's theme to access breakpoints
+  const theme = useTheme();
+  const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+
+    // Clear the error for this field
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: null });
+    }
   };
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
   };
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -45,8 +68,13 @@ const Registration = () => {
       const response = await api.post("/auth/signup", formData);
 
       const data = response.data;
-      localStorage.setItem("token", data.token);
-      window.location.href = "/dashboard";
+      if(data.message) {
+        toast.success(data.message);
+      }
+      setTimeout(() => {
+        localStorage.setItem("token", data.token);
+        window.location.href = "/dashboard";
+      }, 4000);
     } catch (error) {
       setLoading(false);
       if (error.response && error.response.data) {
@@ -71,8 +99,9 @@ const Registration = () => {
       }
     }
   };
+
   return (
-    <Grid container style={{ minHeight: "100vh" }}>
+    <Grid container style={{ minHeight: isMdUp ? "100vh" : "auto" }}>
       {/* Left Side */}
       <Grid
         item
@@ -83,13 +112,18 @@ const Registration = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          padding: 16,
         }}
       >
         <Box display="flex" alignItems="center">
           <img
             src="Assets/Images/logo.png"
             alt="Logo"
-            style={{ height: "120px", marginRight: "16px" }}
+            style={{
+              height: "50px",
+              marginRight: "16px",
+              maxWidth: "100%",
+            }}
           />
           <Typography
             variant="h4"
@@ -112,11 +146,13 @@ const Registration = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          borderTopLeftRadius: 40,
-          borderBottomLeftRadius: 40,
           overflow: "hidden",
-          boxShadow: "10px -1px 0px 100px #FFEADA",
           fontFamily: "'Poppins', sans-serif",
+          padding: 16,
+          // Conditionally apply styles based on screen size
+          borderTopLeftRadius: isMdUp ? 40 : 0,
+          borderBottomLeftRadius: isMdUp ? 40 : 0,
+          boxShadow: isMdUp ? "10px -1px 0px 100px #FFEADA" : "none",
         }}
       >
         <Box
@@ -127,12 +163,6 @@ const Registration = () => {
           position="relative"
           mx={2}
         >
-          {/* <IconButton
-            style={{ position: "absolute", top: 16, right: 16 }}
-            size="large"
-          >
-            <CloseIcon />
-          </IconButton> */}
           <Typography
             variant="h4"
             fontWeight="bold"
@@ -242,6 +272,42 @@ const Registration = () => {
               error={!!errors.email}
               helperText={errors.email}
             />
+            {/* Phone Number */}
+            <TextField
+              label="Phone Number"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              name="phonenumber"
+              value={formData.phonenumber}
+              onChange={handleInputChange}
+              error={!!errors.phonenumber}
+              helperText={errors.phonenumber}
+            />
+            {/* City */}
+            <TextField
+              label="City"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              name="city"
+              value={formData.city}
+              onChange={handleInputChange}
+              error={!!errors.city}
+              helperText={errors.city}
+            />
+            {/* Address */}
+            <TextField
+              label="Address"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
+              error={!!errors.address}
+              helperText={errors.address}
+            />
             <TextField
               label="Password"
               variant="outlined"
@@ -264,6 +330,33 @@ const Registration = () => {
                 ),
               }}
             />
+
+            {/* Select Role */}
+            <FormControl component="fieldset" margin="normal">
+              <FormLabel component="legend">Select Role</FormLabel>
+              <RadioGroup
+                row
+                name="role"
+                value={formData.role}
+                onChange={handleInputChange}
+              >
+                <FormControlLabel
+                  value="consumer"
+                  control={<Radio />}
+                  label="Consumer"
+                />
+                <FormControlLabel
+                  value="service provider"
+                  control={<Radio />}
+                  label="Service Provider"
+                />
+              </RadioGroup>
+              {errors.role && (
+                <Typography color="error" variant="body2">
+                  {errors.role}
+                </Typography>
+              )}
+            </FormControl>
             {error && (
               <Typography color="error" align="center" mt={2}>
                 {error}
