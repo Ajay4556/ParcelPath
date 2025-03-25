@@ -23,7 +23,6 @@ import { api } from "../API/api.js";
 import { toast } from "react-toastify";
 
 const Registration = () => {
-  // Add phonenumber, city, and address to the formData state
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -34,13 +33,16 @@ const Registration = () => {
     role: "",
   });
 
+  const [gLicenseFile, setGLicenseFile] = useState(null);
+  const [companyRegistrationFile, setCompanyRegistrationFile] = useState(null);
+  const [profileImage, setprofileImage] = useState(null);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [errors, setErrors] = useState({});
 
   const [showPassword, setShowPassword] = useState(false);
 
-  // Use Material-UI's theme to access breakpoints
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
 
@@ -48,7 +50,21 @@ const Registration = () => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
 
-    // Clear the error for this field
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: null });
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    if (name === "gLicense") {
+      setGLicenseFile(files[0]);
+    } else if (name === "companyRegistration") {
+      setCompanyRegistrationFile(files[0]);
+    } else if (name === "profileImage") {
+      setprofileImage(files[0]);
+    }
+
     if (errors[name]) {
       setErrors({ ...errors, [name]: null });
     }
@@ -63,26 +79,37 @@ const Registration = () => {
     setLoading(true);
     setError("");
     setErrors({});
-
+  
     try {
-      const response = await api.post("/auth/signup", formData);
-
-      const data = response.data;
-      if(data.message) {
-        toast.success(data.message);
+      const data = new FormData();
+      Object.keys(formData).forEach((key) => {
+        data.append(key, formData[key]);
+      });
+  
+      if (profileImage) {
+        data.append("profileImage", profileImage);
       }
-      setTimeout(() => {
-        localStorage.setItem("token", data.token);
-        window.location.href = "/dashboard";
-      }, 4000);
-    } catch (error) {
-      setLoading(false);
-      if (error.response && error.response.data) {
-        const { data } = error.response;
-        if (data.errors && Array.isArray(data.errors)) {
+  
+      if (gLicenseFile) {
+        data.append("gLicense", gLicenseFile);
+      }
+      if (companyRegistrationFile) {
+        data.append("companyRegistration", companyRegistrationFile);
+      }
+  
+      const response = await fetch("http://localhost:5000/auth/signup", {
+        method: "POST",
+        body: data,
+      });
+  
+      const result = await response.json();
+  
+      if (!response.ok) {
+        // Handle validation errors
+        if (result.errors && Array.isArray(result.errors)) {
           const fieldErrors = {};
-          data.errors.forEach((errorItem) => {
-            const field = errorItem.path;
+          result.errors.forEach((errorItem) => {
+            const field = errorItem.path || errorItem.field;
             if (fieldErrors[field]) {
               fieldErrors[field] += `, ${errorItem.msg}`;
             } else {
@@ -91,18 +118,28 @@ const Registration = () => {
           });
           setErrors(fieldErrors);
         } else {
-          setError(data.message || "Registration failed. Please try again.");
+          setError(result.message || "Registration failed. Please try again.");
         }
-      } else {
-        setError("An unexpected error occurred.");
-        console.error("Error:", error);
+        setLoading(false);
+        return;
       }
+  
+      // Success handling
+      if (result.message) {
+        toast.success(result.message);
+      }
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 4000);
+    } catch (error) {
+      setLoading(false);
+      setError("An unexpected error occurred.");
+      console.error("Error:", error);
     }
   };
 
   return (
     <Grid container style={{ minHeight: isMdUp ? "100vh" : "auto" }}>
-      {/* Left Side */}
       <Grid
         item
         xs={12}
@@ -136,7 +173,6 @@ const Registration = () => {
         </Box>
       </Grid>
 
-      {/* Right Side */}
       <Grid
         item
         xs={12}
@@ -149,7 +185,6 @@ const Registration = () => {
           overflow: "hidden",
           fontFamily: "'Poppins', sans-serif",
           padding: 16,
-          // Conditionally apply styles based on screen size
           borderTopLeftRadius: isMdUp ? 40 : 0,
           borderBottomLeftRadius: isMdUp ? 40 : 0,
           boxShadow: isMdUp ? "10px -1px 0px 100px #FFEADA" : "none",
@@ -173,10 +208,8 @@ const Registration = () => {
             Create Account
           </Typography>
           <Box mb={3}>
-            {/* Google and Facebook Buttons */}
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
-                {/* Google Button */}
                 <Button
                   variant="contained"
                   fullWidth
@@ -205,7 +238,6 @@ const Registration = () => {
                 </Button>
               </Grid>
               <Grid item xs={12} sm={6}>
-                {/* Facebook Button */}
                 <Button
                   variant="contained"
                   fullWidth
@@ -272,7 +304,6 @@ const Registration = () => {
               error={!!errors.email}
               helperText={errors.email}
             />
-            {/* Phone Number */}
             <TextField
               label="Phone Number"
               variant="outlined"
@@ -284,7 +315,6 @@ const Registration = () => {
               error={!!errors.phonenumber}
               helperText={errors.phonenumber}
             />
-            {/* City */}
             <TextField
               label="City"
               variant="outlined"
@@ -296,7 +326,6 @@ const Registration = () => {
               error={!!errors.city}
               helperText={errors.city}
             />
-            {/* Address */}
             <TextField
               label="Address"
               variant="outlined"
@@ -330,8 +359,18 @@ const Registration = () => {
                 ),
               }}
             />
+            <TextField
+              type="file"
+              label="Upload Profile Picture"
+              fullWidth
+              margin="normal"
+              name="profileImage"
+              onChange={handleFileChange}
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
 
-            {/* Select Role */}
             <FormControl component="fieldset" margin="normal">
               <FormLabel component="legend">Select Role</FormLabel>
               <RadioGroup
@@ -357,6 +396,38 @@ const Registration = () => {
                 </Typography>
               )}
             </FormControl>
+
+            {formData.role === "service provider" && (
+              <>
+                <TextField
+                  type="file"
+                  label="Upload G License"
+                  fullWidth
+                  margin="normal"
+                  name="gLicense"
+                  onChange={handleFileChange}
+                  error={!!errors.gLicense}
+                  helperText={errors.gLicense}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
+                <TextField
+                  type="file"
+                  label="Upload Company Registeration Document"
+                  fullWidth
+                  margin="normal"
+                  name="companyRegistration"
+                  onChange={handleFileChange}
+                  error={!!errors.companyRegistration}
+                  helperText={errors.companyRegistration}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
+              </>
+            )}
+
             {error && (
               <Typography color="error" align="center" mt={2}>
                 {error}

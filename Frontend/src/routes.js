@@ -18,11 +18,12 @@ export default function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<Registration />} />
       <Route path="/posttrip" element={<PostTrip />} />
-      <Route path="/customerdashboard" element={<CustomerDashboard />} />
+      <Route path="/customer-dashboard" element={<CustomerDashboard />} />
       <Route path="/findtrip" element={<FindTrips />} />
       <Route path="/details/:id" element={<TripDetail />} />
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/confirmation" element={<TripConfirmation />} />
+
     </Routes>
   );
 }

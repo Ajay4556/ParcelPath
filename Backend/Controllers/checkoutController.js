@@ -1,20 +1,22 @@
 import Checkout from "../Models/Checkout.js";
 
+
+
 export const checkoutController = async (req, res) => {
+
+  console.log("Received checkout data:", req.body);
+
   try {
-    const { tripId, weight, calculatedPrice, firstName, lastName, streetAddress, aptNumber, state, zip } = req.body;
+    const { tripId, userId, weight, calculatedPrice, shippingAddress, pickupAddress } = req.body;
 
     // Create a new checkout document
     const checkout = new Checkout({
+      userId,
       tripId,
       weight,
       calculatedPrice,
-      firstName,
-      lastName,
-      streetAddress,
-      aptNumber,
-      state,
-      zip
+      shippingAddress,
+      pickupAddress
     });
 
     // Save the checkout document to the database

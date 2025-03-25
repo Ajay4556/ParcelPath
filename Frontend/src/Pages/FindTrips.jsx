@@ -6,14 +6,10 @@ import { Link } from "react-router";
 const FindTrip = () => {
   const [trips, setTrips] = useState([]);
   const [filteredTrips, setFilteredTrips] = useState([]);
-  const [showFilters, setShowFilters] = useState(false);
   const [filterCriteria, setFilterCriteria] = useState({
     pickupCity: "",
     destinationCity: "",
-    minPrice: "",
-    maxPrice: "",
-    startDate: "",
-    endDate: "",
+    sortBy: "priceLowToHigh",
   });
 
   useEffect(() => {
@@ -22,8 +18,7 @@ const FindTrip = () => {
         const response = await fetch("http://localhost:5000/delivery/trips");
         const data = await response.json();
         setTrips(data);
-        setFilteredTrips(data);
-        console.log(data);
+        applyFilters(data); // Apply filters immediately after fetching
       } catch (error) {
         console.error("Error fetching trips:", error);
       }
@@ -35,50 +30,37 @@ const FindTrip = () => {
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilterCriteria((prev) => ({ ...prev, [name]: value }));
+    applyFilters(trips, value);
   };
 
-  const applyFilters = () => {
-    let filtered = trips;
+  const applyFilters = (tripsToFilter = trips, sortBy = filterCriteria.sortBy) => {
+    let filtered = [...tripsToFilter];
 
-    if (filterCriteria.pickupCity) {
-      filtered = filtered.filter((trip) =>
-        trip.pickupLocation
-          .toLowerCase()
-          .includes(filterCriteria.pickupCity.toLowerCase())
-      );
+    if (filterCriteria.pickupCity || filterCriteria.destinationCity) {
+      filtered = filtered.filter((trip) => {
+        const allLocations = [trip.pickupLocation, ...trip.dropoffLocations];
+        const pickupIndex = allLocations.findIndex(
+          (loc) =>
+            loc.toLowerCase() === filterCriteria.pickupCity.toLowerCase()
+        );
+        const destinationIndex = allLocations.findIndex(
+          (loc) =>
+            loc.toLowerCase() === filterCriteria.destinationCity.toLowerCase()
+        );
+        return (
+          pickupIndex !== -1 &&
+          destinationIndex !== -1 &&
+          pickupIndex < destinationIndex
+        );
+      });
     }
 
-    if (filterCriteria.destinationCity) {
-      filtered = filtered.filter((trip) =>
-        trip.dropoffLocation
-          .toLowerCase()
-          .includes(filterCriteria.destinationCity.toLowerCase())
-      );
-    }
-
-    if (filterCriteria.minPrice) {
-      filtered = filtered.filter(
-        (trip) => trip.price >= parseFloat(filterCriteria.minPrice)
-      );
-    }
-
-    if (filterCriteria.maxPrice) {
-      filtered = filtered.filter(
-        (trip) => trip.price <= parseFloat(filterCriteria.maxPrice)
-      );
-    }
-
-    if (filterCriteria.startDate) {
-      filtered = filtered.filter(
-        (trip) =>
-          new Date(trip.pickupDate) >= new Date(filterCriteria.startDate)
-      );
-    }
-
-    if (filterCriteria.endDate) {
-      filtered = filtered.filter(
-        (trip) => new Date(trip.dropoffDate) <= new Date(filterCriteria.endDate)
-      );
+    if (sortBy === "showSpecialTrips") {
+      filtered = filtered.filter((trip) => trip.deliveryType === "special");
+    } else if (sortBy === "priceLowToHigh") {
+      filtered.sort((a, b) => a.price - b.price);
+    } else if (sortBy === "earliestFinishDate") {
+      filtered.sort((a, b) => new Date(a.dropoffDate) - new Date(b.dropoffDate));
     }
 
     setFilteredTrips(filtered);
@@ -90,7 +72,6 @@ const FindTrip = () => {
 
       <main className="flex-grow container mx-auto pt-24 mt-10 p-4 md:p-10">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-          {/* Search Section */}
           <div className="flex flex-col md:flex-row items-start md:items-center">
             <h1 className="text-3xl font-bold mb-4 md:mb-0 md:mr-4">
               Find A Trip <span className="border-b-4 border-orange-500"></span>
@@ -114,74 +95,33 @@ const FindTrip = () => {
               />
               <button
                 className="bg-orange-500 text-white px-4 py-2 rounded mb-2"
-                onClick={applyFilters}
+                onClick={() => applyFilters()}
               >
                 Search
               </button>
             </div>
           </div>
 
-          {/* Filter Button */}
           <div className="mt-4 md:mt-0">
-            <button
-              className="text-gray-600 hover:text-black text-xl"
-              onClick={() => setShowFilters(!showFilters)}
+            <label className="font-bold" htmlFor="sortBy">Sort By:  </label>
+            <select
+              name="sortBy"
+              value={filterCriteria.sortBy}
+              onChange={handleFilterChange}
+              className="border border-gray-300 p-2 rounded"
             >
-              {showFilters ? "Close Filters" : "Filter trips by date and price"}
-            </button>
+              <option value="priceLowToHigh">Price (Low to High)</option>
+              <option value="earliestFinishDate">Earliest Finish Date</option>
+              <option value="showSpecialTrips">Show Special Trips</option>
+            </select>
           </div>
         </div>
 
-        {/* Filters Section */}
-        {/* {showFilters && (
-          <div className="mb-8 p-4 border border-gray-300 rounded">
-            <div className="flex flex-wrap items-center">
-              <input
-                type="number"
-                name="minPrice"
-                placeholder="Min Price"
-                className="border border-gray-300 p-2 text-sm rounded mr-4 mb-2"
-                value={filterCriteria.minPrice}
-                onChange={handleFilterChange}
-              />
-              <input
-                type="number"
-                name="maxPrice"
-                placeholder="Max Price"
-                className="border border-gray-300 p-2 text-sm rounded mr-4 mb-2"
-                value={filterCriteria.maxPrice}
-                onChange={handleFilterChange}
-              />
-              <input
-                type="date"
-                name="startDate"
-                className="border border-gray-300 p-2 text-sm rounded mr-4 mb-2"
-                value={filterCriteria.startDate}
-                onChange={handleFilterChange}
-              />
-              <input
-                type="date"
-                name="endDate"
-                className="border border-gray-300 p-2 text-sm rounded mr-4 mb-2"
-                value={filterCriteria.endDate}
-                onChange={handleFilterChange}
-              />
-              <button
-                className="bg-orange-500 text-white px-4 py-2 rounded mb-2"
-                onClick={applyFilters}
-              >
-                Apply Filters
-              </button>
-            </div>
-          </div>
-        )} */}
-
-        {/* Trips Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredTrips.map((trip) => (
             <div
               key={trip._id}
-              className="bg-white shadow rounded overflow-hidden p-4"
+              className="bg-white shadow rounded overflow-hidden p-4 relative"
             >
               <div className="relative w-full h-48">
                 <img
@@ -194,15 +134,19 @@ const FindTrip = () => {
                     <span className="text-white">No Image Available</span>
                   </div>
                 )}
+                {trip.deliveryType === "special" && (
+                  <div className="absolute top-0 right-0 bg-gold text-white p-1 rounded-bl">
+                    ⭐
+                  </div>
+                )}
               </div>
 
-              {/* Trip Details */}
               <div className="p-4">
                 <h2 className="text-xl font-bold mb-2">
                   {trip.serviceProvider}
                 </h2>
                 <h2 className="text-xl font-bold mb-2">
-                  {trip.pickupLocation} to {trip.dropoffLocation}
+                  {trip.pickupLocation} to {trip.dropoffLocations.join(", ")}
                 </h2>
                 <p className="text-gray-600 mb-2">
                   <span role="img" aria-label="calendar">

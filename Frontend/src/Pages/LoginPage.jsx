@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { FaFacebookF } from "react-icons/fa";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { api } from "../API/api.js";
 import { Footer } from "../Shared/Footer.jsx";
 import { toast } from "react-toastify";
@@ -26,7 +26,7 @@ const LoginPage = () => {
   const [error, setError] = useState("");
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
-
+  const navigate = useNavigate();
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -57,7 +57,7 @@ const LoginPage = () => {
       }
       setTimeout(() => {
         localStorage.setItem("token", data.token);
-        window.location.href = "/dashboard";
+        navigate("/dashboard")
       }, 4000);
     } catch (error) {
       setLoading(false);

@@ -1,5 +1,5 @@
 import Trip from "../Models/Trip.js";
-import cloudinary from "../config/cloudinary.js";
+import cloudinary from "../Config/cloudinary.js";
 import { Readable } from "stream";
 
 export const saveTripController = async (req, res) => {
