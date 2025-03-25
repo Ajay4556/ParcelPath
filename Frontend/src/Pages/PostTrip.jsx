@@ -1,14 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaSearch, FaCalendarAlt, FaClock } from "react-icons/fa";
 import { Navbar } from "../Shared/Navbar"; // Adjust if your path differs
 import { Footer } from "../Shared/Footer"; // Adjust if your path differs
+import { getUserData } from "../components/LoginHandler";
 
 const PostTrip = () => {
   const today = new Date().toISOString().split("T")[0];
+  const [userData, setUserData] = useState({});
 
   const [formData, setFormData] = useState({
+    userId: "",
     pickupLocation: "",
     dropoffLocation: "",
+    stops: "",
     pickupDate: "",
     pickupTime: "",
     dropoffDate: "",
@@ -17,7 +21,30 @@ const PostTrip = () => {
     weightCapacity: "",
     price: "",
     description: "",
+    deliveryType: "normal",
   });
+
+  useEffect(() => {
+    const checkUserStatus = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (token) {
+          const user = await getUserData(); // Assuming this function fetches the user
+          if (user && user.id) {
+            setUserData(user);
+            setFormData((prevFormData) => ({
+              ...prevFormData,
+              userId: user.id, // Or user._id if that's the field name
+            }));
+          }
+        }
+      } catch (error) {
+        console.error("Error checking user status:", error);
+      }
+    };
+
+    checkUserStatus();
+  }, []);
 
   // Track vehicle image as a File separately
   const [vehicleImage, setVehicleImage] = useState(null);
@@ -61,15 +88,33 @@ const PostTrip = () => {
     // Construct a FormData object to send both text fields and image
     const data = new FormData();
 
+    // Prepare dropoff locations array
+    const dropoffLocations = formData.stops
+      ? [
+          ...formData.stops.split(",").map((stop) => stop.trim()),
+          formData.dropoffLocation,
+        ]
+      : [formData.dropoffLocation];
+
     // Append text fields
     Object.keys(formData).forEach((key) => {
-      data.append(key, formData[key]);
+      if (key !== "stops" && key !== "dropoffLocation") {
+        data.append(key, formData[key]);
+      }
+    });
+
+    // Append dropoff locations as an array
+    dropoffLocations.forEach((location, index) => {
+      data.append(`dropoffLocations[${index}]`, location);
     });
 
     // Append the file
     if (vehicleImage) {
       data.append("vehicleImage", vehicleImage);
     }
+
+    console.log(data);
+    
 
     try {
       const response = await fetch("http://localhost:5000/delivery/trips", {
@@ -85,7 +130,7 @@ const PostTrip = () => {
           result.errors.forEach((err) => {
             if (err.includes("Pickup location")) {
               errorMessages.pickupLocation = err;
-            } else if (err.includes("Drop off location")) {
+            } else if (err.includes("At least one")) {
               errorMessages.dropoffLocation = err;
             } else if (err.includes("Pickup date")) {
               errorMessages.pickupDate = err;
@@ -105,6 +150,8 @@ const PostTrip = () => {
               errorMessages.serviceProvider = err;
             } else if (err.includes("Vehicle Image")) {
               errorMessages.vehicleImage = err;
+            } else if (err.includes("Delivery type")) {
+              errorMessages.deliveryType = err;
             }
           });
         }
@@ -114,6 +161,7 @@ const PostTrip = () => {
         setFormData({
           pickupLocation: "",
           dropoffLocation: "",
+          stops: "",
           pickupDate: "",
           pickupTime: "",
           dropoffDate: "",
@@ -122,6 +170,7 @@ const PostTrip = () => {
           weightCapacity: "",
           price: "",
           description: "",
+          deliveryType: "normal",
         });
         setVehicleImage(null);
         setErrors({});
@@ -169,6 +218,21 @@ const PostTrip = () => {
               {errors.dropoffLocation && (
                 <p className="text-red-500 text-sm">{errors.dropoffLocation}</p>
               )}
+            </div>
+          </div>
+
+          {/* Stops */}
+          <div className="mb-4">
+            <div className="relative">
+              <FaSearch className="absolute left-3 top-3 text-gray-400" />
+              <input
+                type="text"
+                name="stops"
+                placeholder="Add stops (comma separated)"
+                className="w-full border border-red-300 p-2 pl-10 rounded"
+                value={formData.stops}
+                onChange={handleInputChange}
+              />
             </div>
           </div>
 
@@ -324,6 +388,23 @@ const PostTrip = () => {
             ></textarea>
             {errors.description && (
               <p className="text-red-500 text-sm">{errors.description}</p>
+            )}
+          </div>
+
+          {/* Delivery Type */}
+          <div className="mb-4">
+            <label className="font-bold mb-2 block">Delivery Type</label>
+            <select
+              name="deliveryType"
+              className="w-full border border-red-300 p-2 rounded"
+              value={formData.deliveryType}
+              onChange={handleInputChange}
+            >
+              <option value="normal">Normal</option>
+              <option value="special">Special</option>
+            </select>
+            {errors.deliveryType && (
+              <p className="text-red-500 text-sm">{errors.deliveryType}</p>
             )}
           </div>
 
