@@ -146,7 +146,7 @@ export const Navbar = ({ isWhite }) => {
                   ? "/admin-dashboard"
                   : "/customer-dashboard"
               }
-              className={isWhite ? "text-white-600 capitalize" : "text-gray-600 capitalize"}
+              className={isWhite ? "text-white capitalize" : "text-gray-600 capitalize"}
             >
               {userName}
             </Link>

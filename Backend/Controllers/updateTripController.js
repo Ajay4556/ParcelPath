@@ -2,12 +2,11 @@ import Trip from "../Models/Trip.js";
 import cloudinary from "../Config/cloudinary.js";
 import { Readable } from "stream";
 
-export const saveTripController = async (req, res) => {
+export const updateTripController = async (req, res) => {
   try {
+    const { id } = req.params;
     const {
-      pickupLocation,
       serviceProvider,
-      dropoffLocations,
       pickupDate,
       dropoffDate,
       pickupTime,
@@ -16,47 +15,49 @@ export const saveTripController = async (req, res) => {
       price,
       description,
       deliveryType,
-      userId
     } = req.body;
 
-    let cloudinaryPublicId = "";
+    let updateData = {
+      serviceProvider,
+      pickupDate,
+      dropoffDate,
+      pickupTime,
+      dropoffTime,
+      weightCapacity,
+      price,
+      description,
+      deliveryType,
+    };
 
     if (req.file) {
       const bufferStream = new Readable();
       bufferStream.push(req.file.buffer);
       bufferStream.push(null);
 
-      await new Promise((resolve, reject) => {
+      const result = await new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
           { folder: "parcelpath" },
           (error, result) => {
             if (error) return reject(error);
-            cloudinaryPublicId = result.public_id;
             return resolve(result);
           }
         );
         bufferStream.pipe(uploadStream);
       });
+
+      updateData.image = result.public_id;
     }
 
-    const trip = new Trip({
-      userId,
-      pickupLocation,
-      serviceProvider,
-      dropoffLocations,
-      pickupDate,
-      dropoffDate,
-      pickupTime,
-      dropoffTime,
-      weightCapacity,
-      price,
-      description,
-      deliveryType,
-      image: cloudinaryPublicId,
+    const updatedTrip = await Trip.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
     });
 
-    await trip.save();
-    res.status(201).json({ message: "Trip created successfully!", trip });
+    if (!updatedTrip) {
+      return res.status(404).json({ message: "Trip not found." });
+    }
+
+    res.status(200).json({ message: "Trip updated successfully!", trip: updatedTrip });
   } catch (error) {
     if (error.name === "ValidationError") {
       const errors = Object.values(error.errors).map((err) => err.message);
