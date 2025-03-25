@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import authRoutes from "./Routes/AuthRoutes.js";
 import deliveryRoutes from "./Routes/DeliveryRoute.js";
+import adminRoutes from "./Routes/adminRoutes.js"
 import connectDB from "./Config/database.js";
 import cors from "cors";
 dotenv.config();
@@ -23,6 +24,7 @@ connectDB();
 
 app.use("/auth", authRoutes);
 app.use("/delivery", deliveryRoutes);
+app.use("/admin", adminRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello, World!");

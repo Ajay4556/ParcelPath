@@ -11,6 +11,7 @@ import socialUserSchema from "../Models/SocialUserSchema.js";
 import { generateToken } from "../Utils/generateToken.js";
 import { getUserByEmailController } from "../Controllers/getUserByEmailController.js"; 
 import upload from "../middleware/upload.js";
+import { deleteUserController } from "../Controllers/deleteUserController.js";
 
 dotenv.config();
 
@@ -140,6 +141,7 @@ router.post("/signup", upload.fields([{ name: 'gLicense' }, { name: 'companyRegi
 router.post("/login", validateLogin, loginController);
 
 router.get("/user/:userId", getSingleUser);
+router.delete("/deleteUser/:id", deleteUserController);
 router.get('/user/email/:email', getUserByEmailController);
 
 export default router;
