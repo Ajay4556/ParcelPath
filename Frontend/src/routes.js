@@ -10,6 +10,8 @@ import TripConfirmation from './Pages/TripConfirmation'
 import Checkout from './Pages/Checkout'
 import CustomerDashboard from "./Pages/CustomerDashboard";
 import ProviderDashboard from "./Pages/ProviderDashboard";
+import SetFeaturedTrips from "./Pages/SetFeaturedTrips";
+import AdminDashboard from "./Pages/AdminDashboard";
 
 export default function AppRoutes() {
   return (
@@ -25,6 +27,8 @@ export default function AppRoutes() {
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/confirmation" element={<TripConfirmation />} />
       <Route path="/provider-dashboard" element={<ProviderDashboard />} />
+      <Route path="/featured-trips" element={<SetFeaturedTrips />} />
+      <Route path="/admin-dashboard" element={<AdminDashboard />} />
 
     </Routes>
   );
