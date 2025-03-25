@@ -1,33 +1,46 @@
 import React, { useState, useEffect } from "react";
 import { Box, Typography } from "@mui/material";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { getUserData } from "../components/LoginHandler.js";
 
-export const Navbar = () => {
+export const Navbar = ({ isWhite }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState("");
+  const [userData, setUserData] = useState({});
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+  const navigate = useNavigate();
   useEffect(() => {
-    const checkCookie = (name) => {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return true;
-      else return false;
+    const checkUserStatus = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (token) {
+          setIsLoggedIn(true);
+          const user = await getUserData();
+          setUserData(user);
+          setUserName(user.fullName);
+        } else {
+          setIsLoggedIn(false);
+        }
+      } catch (error) {
+        console.error("Error checking user status:", error);
+        setIsLoggedIn(false);
+      }
     };
 
-    const isSessionTokenPresent = checkCookie("authjs.session-token");
-    setIsLoggedIn(isSessionTokenPresent);
+    checkUserStatus();
   }, []);
 
   const handleLogout = () => {
-    document.cookie =
-      "authjs.session-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    localStorage.removeItem("token");
+    window.location.href = "http://localhost:5000/auth/google/signout";
     setIsLoggedIn(false);
-    window.location.href = "/";
   };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+
+  const style = isWhite ? "text-white text-gray-600 hover:text-gray-400" : "text-gray-600 hover:text-gray-400";
 
   return (
     <nav
@@ -43,7 +56,7 @@ export const Navbar = () => {
         <Typography
           variant="h5"
           fontWeight="Regular"
-          color="black"
+          color={isWhite ? "white" : "black"}
           style={{ fontFamily: "'Kaushan Script', cursive" }}
         >
           PARCELPATH
@@ -82,37 +95,72 @@ export const Navbar = () => {
       </div>
 
       {/* Navigation Links */}
-      <ul className="hidden md:flex space-x-6">
-        <li>
-          <Link to="/" className="text-gray-600 hover:text-gray-400">
-            Home
-          </Link>
-        </li>
-        <li>
-          <Link to="/posttrip" className="text-gray-600 hover:text-gray-400">
-            Post Trip
-          </Link>
-        </li>
-        <li>
-          <Link to="/findtrip" className="text-gray-600 hover:text-gray-400">
-            Find Trip
-          </Link>
-        </li>
-      </ul>
+      {userData && Object.keys(userData).length > 0 && (
+        <ul className="hidden md:flex space-x-6">
+          <li>
+            <Link to="/" className={style}>
+              Home
+            </Link>
+          </li>
+          <li>
+            <Link to="/findtrip" className={style}>
+              Find Trip
+            </Link>
+          </li>
+          {userData.role === "service provider" && (
+            <>
+              <li>
+                <Link
+                  to="/posttrip"
+                  className={style}
+                >
+                  Post Trip
+                </Link>
+              </li>
+            </>
+          )}
+          {userData.role === "admin" && (
+            <>
+              <li>
+                <Link
+                  to="/featured-trips"
+                  className={style}
+                >
+                  Set Featured Trips
+                </Link>
+              </li>
+            </>
+          )}
+        </ul>
+      )}
 
       {/* Authentication Buttons */}
       <div className="hidden md:flex space-x-4">
         {isLoggedIn ? (
-          <button
-            onClick={handleLogout}
-            className="text-gray-600 hover:text-gray-400"
-          >
-            Logout
-          </button>
+          <>
+            <Link
+              to={
+                userData.role === "service provider"
+                  ? "/provider-dashboard"
+                  : userData.role === "admin"
+                  ? "/admin-dashboard"
+                  : "/customer-dashboard"
+              }
+              className={isWhite ? "text-white-600 capitalize" : "text-gray-600 capitalize"}
+            >
+              {userName}
+            </Link>
+            <button
+              onClick={handleLogout} // Ensure the function is called correctly
+              className={style}
+            >
+              Logout
+            </button>
+          </>
         ) : (
           <>
             <Link to="/login">
-              <button className="text-gray-600 hover:text-gray-400">
+              <button className={style}>
                 Login
               </button>
             </Link>
@@ -157,7 +205,7 @@ export const Navbar = () => {
               </Link>
             </li>
 
-            <li className="w-full border-t border-gray-700"></li>
+            {/* <li className="w-full border-t border-gray-700"></li> */}
             {isLoggedIn ? (
               <li>
                 <button

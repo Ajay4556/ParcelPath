@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router";
 import { Footer } from "../Shared/Footer";
 import { Navbar } from "../Shared/Navbar";
-import { Link } from "react-router";
+import { Link } from "react-router"; // Corrected import for Link
 
 const TripConfirmation = () => {
   const location = useLocation();
@@ -76,9 +76,11 @@ const TripConfirmation = () => {
               <h2 className="text-lg font-bold mb-2">Order Details</h2>
               <p><strong>Order ID:</strong> {checkout._id}</p>
               <p><strong>Weight:</strong> {checkout.weight} grams</p>
-              <p><strong>Total Price:</strong> ${checkout.calculatedPrice}</p>
-              <p><strong>Name:</strong> {checkout.firstName} {checkout.lastName}</p>
-              <p><strong>Address:</strong> {checkout.streetAddress}, Apt {checkout.aptNumber}, {checkout.state}, {checkout.zip}</p>
+              <p><strong>Total Price:</strong> ${checkout.calculatedPrice.toFixed(2)}</p>
+              <p><strong>Shipping Name:</strong> {checkout.shippingAddress.firstName} {checkout.shippingAddress.lastName}</p>
+              <p><strong>Shipping Address:</strong> {checkout.shippingAddress.streetAddress}, Apt {checkout.shippingAddress.aptNumber}, {checkout.shippingAddress.state}, {checkout.shippingAddress.zip}</p>
+              <p><strong>Pickup Name:</strong> {checkout.pickupAddress.firstName} {checkout.pickupAddress.lastName}</p>
+              <p><strong>Pickup Address:</strong> {checkout.pickupAddress.streetAddress}, Apt {checkout.pickupAddress.aptNumber}, {checkout.pickupAddress.state}, {checkout.pickupAddress.zip}</p>
               <p><strong>Order Date:</strong> {new Date(checkout.createdAt).toLocaleDateString()}</p>
             </div>
           )}

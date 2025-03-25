@@ -22,6 +22,13 @@ export const loginController = async (req, res) => {
       });
     }
 
+    if(user?.isVerified === false) {
+      return res.status(400).json({
+        success: false,
+        message: "Please wait for admin approval before logging in",
+      });
+    }
+
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "24h",
     });

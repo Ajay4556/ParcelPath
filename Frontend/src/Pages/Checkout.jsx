@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { Footer } from "../Shared/Footer";
 import { Navbar } from "../Shared/Navbar";
+import { getUserData } from "../components/LoginHandler";
 
 const Checkout = () => {
   const location = useLocation();
@@ -9,12 +10,22 @@ const Checkout = () => {
   const { trip } = location.state || {};
   const [weight, setWeight] = useState("");
   const [calculatedPrice, setCalculatedPrice] = useState(0);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [streetAddress, setStreetAddress] = useState("");
-  const [aptNumber, setAptNumber] = useState("");
-  const [state, setState] = useState("");
-  const [zip, setZip] = useState("");
+  const [shippingAddress, setShippingAddress] = useState({
+    firstName: "",
+    lastName: "",
+    streetAddress: "",
+    aptNumber: "",
+    state: "",
+    zip: ""
+  });
+  const [pickupAddress, setPickupAddress] = useState({
+    firstName: "",
+    lastName: "",
+    streetAddress: "",
+    aptNumber: "",
+    state: "",
+    zip: ""
+  });
   const [nameOnCard, setNameOnCard] = useState("");
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
@@ -22,13 +33,30 @@ const Checkout = () => {
   const [apiErrors, setApiErrors] = useState(null);
   const [weightError, setWeightError] = useState(null);
   const [errors, setErrors] = useState({});
+  const [userData, setUserData] = useState({});
+
+  useEffect(() => {
+    const checkUserStatus = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (token) {
+          const user = await getUserData();
+          setUserData(user);
+        }
+      } catch (error) {
+        console.error("Error checking user status:", error);
+      }
+    };
+
+    checkUserStatus();
+  }, []);
 
   const handleWeightChange = (e) => {
     const inputWeight = e.target.value;
     setWeight(inputWeight);
 
     if (trip && inputWeight) {
-      const weightCapacityInGrams = trip.weightCapacity * 1000; // Convert kg to grams
+      const weightCapacityInGrams = trip.weightCapacity * 1000;
       if (inputWeight > weightCapacityInGrams) {
         setWeightError(
           `The maximum allowed weight is ${trip.weightCapacity} kg.`
@@ -71,14 +99,11 @@ const Checkout = () => {
 
     const checkoutData = {
       tripId: trip._id,
+      userId: userData.id,
       weight,
       calculatedPrice,
-      firstName,
-      lastName,
-      streetAddress,
-      aptNumber,
-      state,
-      zip,
+      shippingAddress,
+      pickupAddress
     };
 
     try {
@@ -106,7 +131,10 @@ const Checkout = () => {
               errorMessages.address = err;
             } else if (err.includes("State")) {
               errorMessages.state = err;
-            } else if (err.includes("ZIP code") || err.includes("postal code")) {
+            } else if (
+              err.includes("ZIP code") ||
+              err.includes("postal code")
+            ) {
               errorMessages.zip = err;
             }
           });
@@ -205,8 +233,8 @@ const Checkout = () => {
                 <div>
                   <input
                     type="text"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
+                    value={shippingAddress.firstName}
+                    onChange={(e) => setShippingAddress({ ...shippingAddress, firstName: e.target.value })}
                     placeholder="First Name"
                     className="border border-gray-300 p-2 rounded w-full"
                   />
@@ -219,8 +247,8 @@ const Checkout = () => {
                 <div>
                   <input
                     type="text"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
+                    value={shippingAddress.lastName}
+                    onChange={(e) => setShippingAddress({ ...shippingAddress, lastName: e.target.value })}
                     placeholder="Last Name"
                     className="border border-gray-300 p-2 rounded w-full"
                   />
@@ -235,13 +263,15 @@ const Checkout = () => {
               <div>
                 <input
                   type="text"
-                  value={streetAddress}
-                  onChange={(e) => setStreetAddress(e.target.value)}
+                  value={shippingAddress.streetAddress}
+                  onChange={(e) => setShippingAddress({ ...shippingAddress, streetAddress: e.target.value })}
                   placeholder="Street Address"
                   className="w-full border border-gray-300 p-2 rounded mb-4"
                 />
                 {errors.address && (
-                  <p className="text-red-500 text-sm mt-1 mb-4">{errors.address}</p>
+                  <p className="text-red-500 text-sm mt-1 mb-4">
+                    {errors.address}
+                  </p>
                 )}
               </div>
 
@@ -249,8 +279,8 @@ const Checkout = () => {
                 <div>
                   <input
                     type="text"
-                    value={aptNumber}
-                    onChange={(e) => setAptNumber(e.target.value)}
+                    value={shippingAddress.aptNumber}
+                    onChange={(e) => setShippingAddress({ ...shippingAddress, aptNumber: e.target.value })}
                     placeholder="Apt Number"
                     className="border border-gray-300 p-2 rounded w-full"
                   />
@@ -258,8 +288,8 @@ const Checkout = () => {
                 <div>
                   <input
                     type="text"
-                    value={state}
-                    onChange={(e) => setState(e.target.value)}
+                    value={shippingAddress.state}
+                    onChange={(e) => setShippingAddress({ ...shippingAddress, state: e.target.value })}
                     placeholder="State"
                     className="border border-gray-300 p-2 rounded w-full"
                   />
@@ -270,8 +300,94 @@ const Checkout = () => {
                 <div>
                   <input
                     type="text"
-                    value={zip}
-                    onChange={(e) => setZip(e.target.value)}
+                    value={shippingAddress.zip}
+                    onChange={(e) => setShippingAddress({ ...shippingAddress, zip: e.target.value })}
+                    placeholder="Zip"
+                    className="border border-gray-300 p-2 rounded w-full"
+                  />
+                  {errors.zip && (
+                    <p className="text-red-500 text-sm mt-1">{errors.zip}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Pickup Address Section */}
+              <h2 className="text-lg md:text-xl font-bold mb-4">
+                Pickup Address
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <input
+                    type="text"
+                    value={pickupAddress.firstName}
+                    onChange={(e) => setPickupAddress({ ...pickupAddress, firstName: e.target.value })}
+                    placeholder="First Name"
+                    className="border border-gray-300 p-2 rounded w-full"
+                  />
+                  {errors.firstName && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.firstName}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    value={pickupAddress.lastName}
+                    onChange={(e) => setPickupAddress({ ...pickupAddress, lastName: e.target.value })}
+                    placeholder="Last Name"
+                    className="border border-gray-300 p-2 rounded w-full"
+                  />
+                  {errors.lastName && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.lastName}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <input
+                  type="text"
+                  value={pickupAddress.streetAddress}
+                  onChange={(e) => setPickupAddress({ ...pickupAddress, streetAddress: e.target.value })}
+                  placeholder="Street Address"
+                  className="w-full border border-gray-300 p-2 rounded mb-4"
+                />
+                {errors.address && (
+                  <p className="text-red-500 text-sm mt-1 mb-4">
+                    {errors.address}
+                  </p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                  <input
+                    type="text"
+                    value={pickupAddress.aptNumber}
+                    onChange={(e) => setPickupAddress({ ...pickupAddress, aptNumber: e.target.value })}
+                    placeholder="Apt Number"
+                    className="border border-gray-300 p-2 rounded w-full"
+                  />
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    value={pickupAddress.state}
+                    onChange={(e) => setPickupAddress({ ...pickupAddress, state: e.target.value })}
+                    placeholder="State"
+                    className="border border-gray-300 p-2 rounded w-full"
+                  />
+                  {errors.state && (
+                    <p className="text-red-500 text-sm mt-1">{errors.state}</p>
+                  )}
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    value={pickupAddress.zip}
+                    onChange={(e) => setPickupAddress({ ...pickupAddress, zip: e.target.value })}
                     placeholder="Zip"
                     className="border border-gray-300 p-2 rounded w-full"
                   />

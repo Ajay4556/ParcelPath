@@ -47,10 +47,16 @@ const userSchema = new mongoose.Schema({
     required: [true, "Role is required"],
     default: "consumer",
   },
+  profileImage: {
+    type: String
+  },
   createdAt: {
     type: Date,
     default: Date.now,
   },
+  gLicenseImage: String,
+  companyRegistrationImage: String,
+  isVerified: { type: Boolean, default: false },
 });
 
 const User = mongoose.model("User", userSchema);
