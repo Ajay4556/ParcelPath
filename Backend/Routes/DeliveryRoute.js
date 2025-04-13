@@ -12,6 +12,8 @@ import { fetchFeaturedTrips } from "../Controllers/fetchFeaturedTrips.js";
 import { getUserTripsController } from "../Controllers/getUserTripsController.js";
 import { getTripsByUserId } from "../Controllers/getTripsByUserId.js";
 import { disableExpiredTrips } from "../Controllers/disableExpiredTrips.js";
+import { fetchCheckoutsByTripId } from "../Controllers/fetchCheckoutsByTripId.js";
+import { updateTripWeight } from "../Controllers/updateTripWeight.js";
 
 const router = express.Router();
 
@@ -28,5 +30,7 @@ router.put("/trips/:id/unfeature", markTripAsUnFeatured);
 router.get("/featured-trips", fetchFeaturedTrips);
 router.get('/user/:userId/trips', getUserTripsController);
 router.get('/disableExpiredTrips', disableExpiredTrips);
+router.get('/checkouts/:tripId', fetchCheckoutsByTripId);
+router.put('/updateTrip/weight/:tripId', updateTripWeight);
 
 export default router;

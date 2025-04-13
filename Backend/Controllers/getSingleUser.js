@@ -27,7 +27,8 @@ export const getSingleUser = async (req, res) => {
         email: user.email,
         role:user.role,
         isVerified: user.isVerified,
-        profileImage: image || ""
+        profileImage: image || "",
+        reviews: user?.reviews || []
       },
     });
   } catch (error) {

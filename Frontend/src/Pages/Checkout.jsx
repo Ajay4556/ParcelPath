@@ -3,6 +3,94 @@ import { useLocation, useNavigate } from "react-router";
 import { Footer } from "../Shared/Footer";
 import { Navbar } from "../Shared/Navbar";
 import { getUserData } from "../components/LoginHandler";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { Helmet } from "react-helmet";
+
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
+
+const CheckoutForm = ({ trip, userData, weight, calculatedPrice, shippingAddress, pickupAddress, setApiErrors, navigate }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!stripe || !elements) {
+      return;
+    }
+
+    const cardElement = elements.getElement(CardElement);
+
+    const { error, paymentMethod } = await stripe.createPaymentMethod({
+      type: "card",
+      card: cardElement,
+    });
+
+    if (error) {
+      console.error("Stripe error:", error);
+      setApiErrors("An error occurred with your card details.");
+      return;
+    }
+
+    // Proceed with your checkout logic
+    const checkoutData = {
+      tripId: trip._id,
+      userId: userData.id,
+      weight,
+      calculatedPrice,
+      shippingAddress,
+      pickupAddress,
+      paymentMethodId: paymentMethod.id,
+    };
+
+    try {
+      const response = await fetch("http://localhost:5000/delivery/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(checkoutData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setApiErrors("An error occurred during checkout.");
+      } else {
+        // Call the API to update the trip's weight capacity
+        const updateResponse = await fetch(`http://localhost:5000/delivery/updateTrip/weight/${trip._id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ weight }),
+        });
+
+        if (!updateResponse.ok) {
+          const updateError = await updateResponse.json();
+          console.error("Error updating trip weight:", updateError);
+          setApiErrors("An error occurred while updating the trip weight.");
+        } else {
+          // Redirect to confirmation page
+          navigate("/confirmation", { state: { checkoutData: data } });
+        }
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setApiErrors("An error occurred during checkout.");
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <CardElement />
+      <button type="submit" className="bg-orange-500 text-white px-4 py-2 rounded text-center" disabled={!stripe}>
+        Pay
+      </button>
+    </form>
+  );
+};
 
 const Checkout = () => {
   const location = useLocation();
@@ -26,10 +114,6 @@ const Checkout = () => {
     state: "",
     zip: ""
   });
-  const [nameOnCard, setNameOnCard] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvv, setCvv] = useState("");
   const [apiErrors, setApiErrors] = useState(null);
   const [weightError, setWeightError] = useState(null);
   const [errors, setErrors] = useState({});
@@ -73,87 +157,11 @@ const Checkout = () => {
     }
   };
 
-  const validateCardDetails = () => {
-    if (!nameOnCard || !cardNumber || !expiry || !cvv) {
-      alert("Please fill in all card details.");
-      return false;
-    }
-    if (cardNumber.length !== 16 || isNaN(cardNumber)) {
-      alert("Invalid card number.");
-      return false;
-    }
-    if (cvv.length !== 3 || isNaN(cvv)) {
-      alert("Invalid CVV.");
-      return false;
-    }
-    return true;
-  };
-
-  const handleCheckout = async (e) => {
-    e.preventDefault();
-
-    if (weightError) {
-      alert("Please correct the weight error before proceeding.");
-      return;
-    }
-
-    const checkoutData = {
-      tripId: trip._id,
-      userId: userData.id,
-      weight,
-      calculatedPrice,
-      shippingAddress,
-      pickupAddress
-    };
-
-    try {
-      const response = await fetch("http://localhost:5000/delivery/checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(checkoutData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        const errorMessages = {};
-        if (data.errors && Array.isArray(data.errors)) {
-          data.errors.forEach((err) => {
-            if (err.includes("Weight")) {
-              errorMessages.weight = err;
-            } else if (err.includes("First name")) {
-              errorMessages.firstName = err;
-            } else if (err.includes("Last name")) {
-              errorMessages.lastName = err;
-            } else if (err.includes("Street address")) {
-              errorMessages.address = err;
-            } else if (err.includes("State")) {
-              errorMessages.state = err;
-            } else if (
-              err.includes("ZIP code") ||
-              err.includes("postal code")
-            ) {
-              errorMessages.zip = err;
-            }
-          });
-        }
-        setErrors(errorMessages);
-      } else {
-        setErrors("");
-        if (validateCardDetails()) {
-          navigate("/confirmation", { state: { checkoutData: data } });
-        }
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      setApiErrors("An error occurred during checkout.");
-    }
-  };
-
   return (
     <div className="min-h-screen flex flex-col font-poppins">
+      <Helmet>
+        <title>Checkout - Parcelpath</title>
+      </Helmet>
       <Navbar />
 
       <main className="flex-grow container mx-auto px-4 md:px-8 pt-24">
@@ -228,7 +236,7 @@ const Checkout = () => {
             Shipping Address
           </h2>
           <div className="border border-gray-300 p-6 rounded">
-            <form onSubmit={handleCheckout}>
+            <form>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                   <input
@@ -396,50 +404,28 @@ const Checkout = () => {
                   )}
                 </div>
               </div>
-
-              {/* Payment Method Section */}
-              <h2 className="text-lg md:text-xl font-bold mb-4">
-                Payment Method
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <input
-                  type="text"
-                  value={nameOnCard}
-                  onChange={(e) => setNameOnCard(e.target.value)}
-                  placeholder="Name on Card"
-                  className="border border-gray-300 p-2 rounded"
-                />
-                <input
-                  type="text"
-                  value={cardNumber}
-                  onChange={(e) => setCardNumber(e.target.value)}
-                  placeholder="Card Number"
-                  className="border border-gray-300 p-2 rounded"
-                />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <input
-                  type="text"
-                  value={expiry}
-                  onChange={(e) => setExpiry(e.target.value)}
-                  placeholder="Expiry (MM/YY)"
-                  className="border border-gray-300 p-2 rounded"
-                />
-                <input
-                  type="password"
-                  value={cvv}
-                  onChange={(e) => setCvv(e.target.value)}
-                  placeholder="CVV"
-                  className="border border-gray-300 p-2 rounded"
-                />
-              </div>
-              <button
-                type="submit"
-                className="bg-orange-500 text-white px-4 py-2 rounded text-center"
-              >
-                Done
-              </button>
             </form>
+          </div>
+        </section>
+
+        {/* Payment Method Section */}
+        <section className="mb-10">
+          <h2 className="text-lg md:text-xl font-bold mb-4">
+            Payment Method
+          </h2>
+          <div className="border border-gray-300 p-6 rounded">
+            <Elements stripe={stripePromise}>
+              <CheckoutForm
+                trip={trip}
+                userData={userData}
+                weight={weight}
+                calculatedPrice={calculatedPrice}
+                shippingAddress={shippingAddress}
+                pickupAddress={pickupAddress}
+                setApiErrors={setApiErrors}
+                navigate={navigate}
+              />
+            </Elements>
           </div>
         </section>
       </main>
