@@ -21,6 +21,7 @@ import { FaFacebookF } from "react-icons/fa";
 import { Link } from "react-router";
 import { api } from "../API/api.js";
 import { toast } from "react-toastify";
+import { Helmet } from "react-helmet";
 
 const Registration = () => {
   const [formData, setFormData] = useState({
@@ -79,31 +80,31 @@ const Registration = () => {
     setLoading(true);
     setError("");
     setErrors({});
-  
+
     try {
       const data = new FormData();
       Object.keys(formData).forEach((key) => {
         data.append(key, formData[key]);
       });
-  
+
       if (profileImage) {
         data.append("profileImage", profileImage);
       }
-  
+
       if (gLicenseFile) {
         data.append("gLicense", gLicenseFile);
       }
       if (companyRegistrationFile) {
         data.append("companyRegistration", companyRegistrationFile);
       }
-  
+
       const response = await fetch("http://localhost:5000/auth/signup", {
         method: "POST",
         body: data,
       });
-  
+
       const result = await response.json();
-  
+
       if (!response.ok) {
         // Handle validation errors
         if (result.errors && Array.isArray(result.errors)) {
@@ -123,7 +124,7 @@ const Registration = () => {
         setLoading(false);
         return;
       }
-  
+
       // Success handling
       if (result.message) {
         toast.success(result.message);
@@ -140,6 +141,24 @@ const Registration = () => {
 
   return (
     <Grid container style={{ minHeight: isMdUp ? "100vh" : "auto" }}>
+      <Helmet>
+        <title>Register - ParcelPath</title>
+        <meta
+          name="description"
+          content="Create a new account on ParcelPath to start managing your deliveries. Sign up as a consumer or service provider and enjoy our seamless delivery services."
+        />
+        <meta
+          name="keywords"
+          content="ParcelPath, register, sign up, delivery service, courier service, create account, consumer, service provider"
+        />
+        <meta property="og:title" content="Register - ParcelPath" />
+        <meta
+          property="og:description"
+          content="Create a new account on ParcelPath to start managing your deliveries. Sign up as a consumer or service provider and enjoy our seamless delivery services."
+        />
+        <meta property="og:image" content="url-to-your-image" />
+        <meta property="og:url" content="http://yourwebsite.com/register" />
+      </Helmet>
       <Grid
         item
         xs={12}

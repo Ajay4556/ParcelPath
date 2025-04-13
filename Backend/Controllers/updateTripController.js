@@ -1,6 +1,9 @@
 import Trip from "../Models/Trip.js";
+import Checkout from "../Models/Checkout.js";
+import User from "../Models/User.js";
 import cloudinary from "../Config/cloudinary.js";
 import { Readable } from "stream";
+import { sendEmail } from "../Utils/email.js";
 
 export const updateTripController = async (req, res) => {
   try {
@@ -56,6 +59,16 @@ export const updateTripController = async (req, res) => {
     if (!updatedTrip) {
       return res.status(404).json({ message: "Trip not found." });
     }
+
+    // Fetch checkouts and notify users
+    const checkouts = await Checkout.find({ tripId: id });
+    const userIds = checkouts.map(checkout => checkout.userId);
+    const users = await User.find({ _id: { $in: userIds } });
+
+    users.forEach(user => {
+      const emailText = `The trip you booked has been updated. Here are the new details:\n\nPickup Location: ${updatedTrip.pickupLocation}\nDropoff Locations: ${updatedTrip.dropoffLocations.join(', ')}\nPickup Date: ${updatedTrip.pickupDate}\nDropoff Date: ${updatedTrip.dropoffDate}\nService Provider: ${updatedTrip.serviceProvider}`;
+      sendEmail(user.email, 'Trip Updated', emailText);
+    });
 
     res.status(200).json({ message: "Trip updated successfully!", trip: updatedTrip });
   } catch (error) {

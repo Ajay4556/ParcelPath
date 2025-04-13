@@ -3,7 +3,7 @@ import { getCloudinaryImageUrl } from "../Utils/cloudinaryUtil.js";
 
 export const getTripsController = async (req, res) => {
   try {
-    const trips = await Trip.find();
+    const trips = await Trip.find({ isDisabled: false });
 
     const transformedTrips = trips.map((trip) => {
       const tripObj = trip.toObject();

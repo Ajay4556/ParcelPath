@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Navbar } from "../Shared/Navbar";
 import { Footer } from "../Shared/Footer";
+import { Helmet } from "react-helmet";
 
 const SetFeaturedTrips = () => {
   const [trips, setTrips] = useState([]);
@@ -78,11 +79,34 @@ const SetFeaturedTrips = () => {
 
   return (
     <>
+      <Helmet>
+        <title>Set Featured Trips - ParcelPath</title>
+        <meta
+          name="description"
+          content="Manage and set featured delivery trips on ParcelPath. Highlight up to three trips to showcase on the platform."
+        />
+        <meta
+          name="keywords"
+          content="ParcelPath, set featured trips, manage trips, delivery service, courier service, highlight trips"
+        />
+        <meta property="og:title" content="Set Featured Trips - ParcelPath" />
+        <meta
+          property="og:description"
+          content="Manage and set featured delivery trips on ParcelPath. Highlight up to three trips to showcase on the platform."
+        />
+        <meta property="og:image" content="url-to-your-image" />
+        <meta
+          property="og:url"
+          content="http://yourwebsite.com/set-featured-trips"
+        />
+      </Helmet>
       <Navbar />
       <div className="min-h-screen flex flex-col items-center justify-center">
         <main className="flex-grow container mx-auto p-8">
           <section className="max-w-2xl mx-auto mt-10">
-            <h2 className="text-2xl font-bold mb-6 text-center">Recent Trips</h2>
+            <h2 className="text-2xl font-bold mb-6 text-center">
+              Recent Trips
+            </h2>
             <div className="bg-white shadow rounded">
               {trips.map((trip) => (
                 <div
@@ -96,10 +120,12 @@ const SetFeaturedTrips = () => {
                   />
                   <div className="flex-grow">
                     <p className="font-bold">
-                      {trip.pickupLocation} to {trip.dropoffLocations.join(", ")}
+                      {trip.pickupLocation} to{" "}
+                      {trip.dropoffLocations.join(", ")}
                     </p>
                     <p className="text-gray-600">
-                      {new Date(trip.pickupDate).toLocaleDateString()} at {trip.pickupTime}
+                      {new Date(trip.pickupDate).toLocaleDateString()} at{" "}
+                      {trip.pickupTime}
                     </p>
                   </div>
                   {trip.isFeatured ? (
@@ -123,7 +149,7 @@ const SetFeaturedTrips = () => {
           </section>
         </main>
       </div>
-        <Footer />
+      <Footer />
     </>
   );
 };
