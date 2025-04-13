@@ -71,6 +71,10 @@ const tripSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  isDisabled: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const Trip = mongoose.model("Trip", tripSchema);
