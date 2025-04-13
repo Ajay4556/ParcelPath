@@ -3,6 +3,7 @@ import { Footer } from "../Shared/Footer";
 import { Navbar } from "../Shared/Navbar";
 import { useNavigate, useParams } from "react-router";
 import { Link } from "react-router";
+import { Helmet } from "react-helmet";
 
 const TripDetail = () => {
   const { id } = useParams();
@@ -41,6 +42,24 @@ const TripDetail = () => {
 
   return (
     <div className="min-h-screen flex flex-col font-poppins">
+      <Helmet>
+        <title>Trip Details - ParcelPath</title>
+        <meta
+          name="description"
+          content="Explore detailed information about your selected delivery trip on ParcelPath. View trip dates, locations, pricing, and more."
+        />
+        <meta
+          name="keywords"
+          content="ParcelPath, trip details, delivery service, courier service, trip information, book trip"
+        />
+        <meta property="og:title" content="Trip Details - ParcelPath" />
+        <meta
+          property="og:description"
+          content="Explore detailed information about your selected delivery trip on ParcelPath. View trip dates, locations, pricing, and more."
+        />
+        <meta property="og:image" content="url-to-your-image" />
+        <meta property="og:url" content="http://yourwebsite.com/trip-detail" />
+      </Helmet>
       <Navbar />
       <main className="flex-grow container mx-auto px-4 md:px-8 pt-24">
         <h1 className="text-2xl md:text-3xl font-bold text-center mb-12">

@@ -15,6 +15,7 @@ import { Link, useNavigate } from "react-router";
 import { api } from "../API/api.js";
 import { Footer } from "../Shared/Footer.jsx";
 import { toast } from "react-toastify";
+import { Helmet } from "react-helmet";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -57,7 +58,7 @@ const LoginPage = () => {
       }
       setTimeout(() => {
         localStorage.setItem("token", data.token);
-        navigate("/dashboard")
+        navigate("/dashboard");
       }, 4000);
     } catch (error) {
       setLoading(false);
@@ -86,6 +87,24 @@ const LoginPage = () => {
 
   return (
     <Grid container style={{ minHeight: "100vh" }}>
+      <Helmet>
+        <title>Login - ParcelPath</title>
+        <meta
+          name="description"
+          content="Log in to your ParcelPath account to manage your deliveries and access exclusive features. Sign in with email, Google, or Facebook."
+        />
+        <meta
+          name="keywords"
+          content="ParcelPath, login, sign in, delivery service, courier service, Google login, Facebook login"
+        />
+        <meta property="og:title" content="Login - ParcelPath" />
+        <meta
+          property="og:description"
+          content="Log in to your ParcelPath account to manage your deliveries and access exclusive features. Sign in with email, Google, or Facebook."
+        />
+        <meta property="og:image" content="url-to-your-image" />
+        <meta property="og:url" content="http://yourwebsite.com/login" />
+      </Helmet>
       <Grid
         item
         xs={12}

@@ -3,9 +3,11 @@ import { FaSearch, FaCalendarAlt, FaClock } from "react-icons/fa";
 import { Navbar } from "../Shared/Navbar"; // Adjust if your path differs
 import { Footer } from "../Shared/Footer"; // Adjust if your path differs
 import { getUserData } from "../components/LoginHandler";
+import { DateTime } from "luxon";
+import { Helmet } from 'react-helmet';
 
 const PostTrip = () => {
-  const today = new Date().toISOString().split("T")[0];
+  const today = DateTime.local().toISODate(); // Get today's date in local time
   const [userData, setUserData] = useState({});
 
   const [formData, setFormData] = useState({
@@ -85,6 +87,18 @@ const PostTrip = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
+    // Convert dates to UTC before sending to the server
+    const pickupDateUTC = DateTime.fromISO(formData.pickupDate, {
+      zone: "local",
+    })
+      .toUTC()
+      .toISO();
+    const dropoffDateUTC = DateTime.fromISO(formData.dropoffDate, {
+      zone: "local",
+    })
+      .toUTC()
+      .toISO();
+
     // Construct a FormData object to send both text fields and image
     const data = new FormData();
 
@@ -98,10 +112,19 @@ const PostTrip = () => {
 
     // Append text fields
     Object.keys(formData).forEach((key) => {
-      if (key !== "stops" && key !== "dropoffLocation") {
+      if (
+        key !== "stops" &&
+        key !== "dropoffLocation" &&
+        key !== "pickupDate" &&
+        key !== "dropoffDate"
+      ) {
         data.append(key, formData[key]);
       }
     });
+
+    // Append converted UTC dates
+    data.append("pickupDate", pickupDateUTC);
+    data.append("dropoffDate", dropoffDateUTC);
 
     // Append dropoff locations as an array
     dropoffLocations.forEach((location, index) => {
@@ -114,7 +137,6 @@ const PostTrip = () => {
     }
 
     console.log(data);
-    
 
     try {
       const response = await fetch("http://localhost:5000/delivery/trips", {
@@ -182,6 +204,24 @@ const PostTrip = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <Helmet>
+        <title>Post a Trip - ParcelPath</title>
+        <meta
+          name="description"
+          content="Post your delivery trip with ParcelPath. Provide details about your trip, including pickup and dropoff locations, dates, and pricing."
+        />
+        <meta
+          name="keywords"
+          content="ParcelPath, post trip, delivery service, courier service, trip details, pickup location, dropoff location"
+        />
+        <meta property="og:title" content="Post a Trip - ParcelPath" />
+        <meta
+          property="og:description"
+          content="Post your delivery trip with ParcelPath. Provide details about your trip, including pickup and dropoff locations, dates, and pricing."
+        />
+        <meta property="og:image" content="url-to-your-image" />
+        <meta property="og:url" content="http://yourwebsite.com/post-trip" />
+      </Helmet>
       <Navbar />
       <main className="flex-grow container mx-auto px-4 md:px-8 pt-24">
         <h1 className="text-2xl md:text-3xl font-bold text-center mb-8">

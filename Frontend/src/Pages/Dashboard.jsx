@@ -4,6 +4,7 @@ import { Footer } from "../Shared/Footer";
 import { api } from "../API/api.js";
 import { Box, Typography } from "@mui/material";
 import { Link, useNavigate } from "react-router";
+import { Helmet } from "react-helmet";
 import {
   getUserData,
   handleGoogleLoginSession,
@@ -86,6 +87,27 @@ const Dashboard = () => {
 
   return (
     <>
+      <Helmet>
+        <title>Dashboard - ParcelPath</title>
+        <meta
+          name="description"
+          content="Connect with reliable delivery providers for seamless parcel transport with ParcelPath. Flexible, affordable, and convenient delivery solutions tailored to your needs."
+        />
+        <meta
+          name="keywords"
+          content="ParcelPath, courier service, delivery providers, parcel transport, book trip, post trip"
+        />
+        <meta
+          property="og:title"
+          content="Dashboard - ParcelPath Courier Service"
+        />
+        <meta
+          property="og:description"
+          content="Connect with reliable delivery providers for seamless parcel transport with ParcelPath. Flexible, affordable, and convenient delivery solutions tailored to your needs."
+        />
+        <meta property="og:image" content="url-to-your-image" />
+        <meta property="og:url" content="http://yourwebsite.com/dashboard" />
+      </Helmet>
       <div className="font-sans">
         {/* Hero Section with Navbar */}
         <div

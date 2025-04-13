@@ -5,6 +5,7 @@ import { Navbar } from "../Shared/Navbar";
 import { api } from "../API/api";
 import { getUserData } from "../components/LoginHandler";
 import { useNavigate } from "react-router";
+import { Helmet } from "react-helmet";
 
 Modal.setAppElement("#root"); // Set the app element for accessibility
 
@@ -114,6 +115,27 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <Helmet>
+        <title>Admin Dashboard - ParcelPath</title>
+        <meta
+          name="description"
+          content="Manage and verify service providers on ParcelPath. Review provider details, verify credentials, and maintain platform integrity."
+        />
+        <meta
+          name="keywords"
+          content="ParcelPath, admin dashboard, manage providers, verify service providers, delivery service, courier service"
+        />
+        <meta property="og:title" content="Admin Dashboard - ParcelPath" />
+        <meta
+          property="og:description"
+          content="Manage and verify service providers on ParcelPath. Review provider details, verify credentials, and maintain platform integrity."
+        />
+        <meta property="og:image" content="url-to-your-image" />
+        <meta
+          property="og:url"
+          content="http://yourwebsite.com/admin-dashboard"
+        />
+      </Helmet>
       <Navbar />
       <main className="flex-grow container mx-auto p-8 mt-10">
         <div className="text-center mb-8 mt-10">

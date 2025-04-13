@@ -3,6 +3,7 @@ import { useLocation } from "react-router";
 import { Footer } from "../Shared/Footer";
 import { Navbar } from "../Shared/Navbar";
 import { Link } from "react-router"; // Corrected import for Link
+import { Helmet } from "react-helmet";
 
 const TripConfirmation = () => {
   const location = useLocation();
@@ -44,6 +45,9 @@ const TripConfirmation = () => {
 
   return (
     <div className="min-h-screen flex flex-col font-poppins bg-gray-50">
+      <Helmet>
+        <title>Trip Confirmation - Parcelpath</title>
+      </Helmet>
       <Navbar />
 
       <main className="flex-grow container mx-auto px-4 md:px-8 pt-24">
