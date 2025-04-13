@@ -57,6 +57,10 @@ const userSchema = new mongoose.Schema({
   gLicenseImage: String,
   companyRegistrationImage: String,
   isVerified: { type: Boolean, default: false },
+  reviews: {
+    type: [Number],
+    default: [],
+  },
 });
 
 const User = mongoose.model("User", userSchema);

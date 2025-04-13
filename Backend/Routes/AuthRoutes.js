@@ -12,6 +12,7 @@ import { generateToken } from "../Utils/generateToken.js";
 import { getUserByEmailController } from "../Controllers/getUserByEmailController.js"; 
 import upload from "../middleware/upload.js";
 import { deleteUserController } from "../Controllers/deleteUserController.js";
+import { submitReview } from "../Controllers/submitReview.js";
 
 dotenv.config();
 
@@ -143,5 +144,6 @@ router.post("/login", validateLogin, loginController);
 router.get("/user/:userId", getSingleUser);
 router.delete("/deleteUser/:id", deleteUserController);
 router.get('/user/email/:email', getUserByEmailController);
+router.post('/submitReview', submitReview);
 
 export default router;
