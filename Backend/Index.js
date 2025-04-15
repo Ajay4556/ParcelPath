@@ -13,7 +13,8 @@ const port = process.env.PORT || 5000;
 
 const allowedOrigins = [
   'http://localhost:3000', // for local frontend
-  'https://your-netlify-site.netlify.app' // your deployed frontend
+  'https://parcel-path.netlify.app/', // your deployed frontend
+  'https://social-phones-lose.loca.lt'
 ];
 
 app.use(cors({
