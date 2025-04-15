@@ -1,4 +1,4 @@
-import RecentDelivery from "../models/RecentDelivery.js";
+import RecentDelivery from "../Models/RecentDelivery.js";
 
 export const getRecentDeliveries = async (req, res) => {
   try {
