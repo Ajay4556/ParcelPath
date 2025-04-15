@@ -16,7 +16,7 @@ const FindTrip = () => {
   useEffect(() => {
     const disableExpiredTrips = async () => {
       try {
-        await fetch("http://localhost:5000/delivery/disableExpiredTrips", {
+        await fetch(`${process.env.REACT_APP_BASEURL}/delivery/disableExpiredTrips`, {
           method: "GET",
         });
       } catch (error) {
@@ -26,7 +26,7 @@ const FindTrip = () => {
 
     const fetchTrips = async () => {
       try {
-        const response = await fetch("http://localhost:5000/delivery/trips");
+        const response = await fetch(`${process.env.REACT_APP_BASEURL}/delivery/trips`);
         const data = await response.json();
         setTrips(data);
         applyFilters(data); // Apply filters immediately after fetching

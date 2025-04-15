@@ -79,7 +79,7 @@ const CustomerDashboard = () => {
     event.stopPropagation(); // Prevent event propagation
     try {
       const response = await api.post(
-        "http://localhost:5000/auth/submitReview",
+        "${process.env.REACT_APP_BASEURL}/auth/submitReview",
         {
           userId: userId,
           rating: selectedRating,

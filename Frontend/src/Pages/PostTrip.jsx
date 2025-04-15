@@ -137,7 +137,7 @@ const PostTrip = () => {
     console.log(data);
 
     try {
-      const response = await fetch("http://localhost:5000/delivery/trips", {
+      const response = await fetch(`${process.env.REACT_APP_BASEURL}/delivery/trips`, {
         method: "POST",
         body: data, // fetch automatically sets the Content-Type for FormData
       });

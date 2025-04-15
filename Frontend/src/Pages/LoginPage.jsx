@@ -181,7 +181,7 @@ const LoginPage = () => {
                   }}
                   onClick={() => {
                     window.location.href =
-                      "http://localhost:5000/auth/google/signin";
+                      `${process.env.REACT_APP_BASEURL}/auth/google/signin`;
                   }}
                   startIcon={
                     <img
@@ -209,7 +209,7 @@ const LoginPage = () => {
                   }}
                   onClick={() => {
                     window.location.href =
-                      "http://localhost:5000/auth/facebook/signin";
+                      `${process.env.REACT_APP_BASEURL}/auth/facebook/signin`;
                   }}
                   startIcon={
                     <Box

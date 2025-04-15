@@ -31,7 +31,7 @@ export const Navbar = ({ isWhite }) => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    window.location.href = "http://localhost:5000/auth/google/signout";
+    window.location.href = `${process.env.REACT_APP_BASEURL}/auth/google/signout`;
     setIsLoggedIn(false);
   };
 

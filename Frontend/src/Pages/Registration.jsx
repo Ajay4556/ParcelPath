@@ -97,7 +97,7 @@ const Registration = () => {
         data.append("companyRegistration", companyRegistrationFile);
       }
 
-      const response = await fetch("http://localhost:5000/auth/signup", {
+      const response = await fetch(`${process.env.REACT_APP_BASEURL}/auth/signup`, {
         method: "POST",
         body: data,
       });
@@ -242,7 +242,7 @@ const Registration = () => {
                   }}
                   onClick={() => {
                     window.location.href =
-                      "http://localhost:5000/auth/google/signin";
+                      `${process.env.REACT_APP_BASEURL}/auth/google/signin`;
                   }}
                   startIcon={
                     <img
@@ -270,7 +270,7 @@ const Registration = () => {
                   }}
                   onClick={() => {
                     window.location.href =
-                      "http://localhost:5000/auth/facebook/signin";
+                      "${process.env.REACT_APP_BASEURL}/auth/facebook/signin";
                   }}
                   startIcon={
                     <Box

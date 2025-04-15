@@ -14,7 +14,7 @@ const SetFeaturedTrips = () => {
 
   const fetchTrips = async () => {
     try {
-      const response = await fetch("http://localhost:5000/delivery/trips");
+      const response = await fetch(`${process.env.REACT_APP_BASEURL}/delivery/trips`);
       if (!response.ok) {
         throw new Error("Failed to fetch trips");
       }
@@ -35,7 +35,7 @@ const SetFeaturedTrips = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/delivery/trips/${id}/feature`,
+        `${process.env.REACT_APP_BASEURL}/delivery/trips/${id}/feature`,
         {
           method: "PUT",
         }
@@ -56,7 +56,7 @@ const SetFeaturedTrips = () => {
   const handleUnfeature = async (id) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/delivery/trips/${id}/unfeature`,
+        `${process.env.REACT_APP_BASEURL}/delivery/trips/${id}/unfeature`,
         {
           method: "PUT",
         }

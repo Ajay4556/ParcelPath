@@ -45,7 +45,7 @@ const CheckoutForm = ({ trip, userData, weight, calculatedPrice, shippingAddress
     };
 
     try {
-      const response = await fetch("http://localhost:5000/delivery/checkout", {
+      const response = await fetch(`${process.env.REACT_APP_BASEURL}/delivery/checkout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -59,7 +59,7 @@ const CheckoutForm = ({ trip, userData, weight, calculatedPrice, shippingAddress
         setApiErrors("An error occurred during checkout.");
       } else {
         // Call the API to update the trip's weight capacity
-        const updateResponse = await fetch(`http://localhost:5000/delivery/updateTrip/weight/${trip._id}`, {
+        const updateResponse = await fetch(`${process.env.REACT_APP_BASEURL}/delivery/updateTrip/weight/${trip._id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",

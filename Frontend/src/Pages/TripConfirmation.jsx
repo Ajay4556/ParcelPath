@@ -14,7 +14,7 @@ const TripConfirmation = () => {
     const fetchTrip = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/delivery/trips/${checkout.tripId}`
+          `${process.env.REACT_APP_BASEURL}/delivery/trips/${checkout.tripId}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch trip details");

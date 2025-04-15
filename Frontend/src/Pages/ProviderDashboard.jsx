@@ -59,7 +59,7 @@ const ProviderDashboard = () => {
   const fetchTripAddresses = async (tripId) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/delivery/checkouts/${tripId}`
+        `${process.env.REACT_APP_BASEURL}/delivery/checkouts/${tripId}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch trip addresses");
@@ -88,7 +88,7 @@ const ProviderDashboard = () => {
         if (user && user.id) {
           setUserData(user);
           const response = await fetch(
-            `http://localhost:5000/delivery/trips/user/${user.id}`
+            `${process.env.REACT_APP_BASEURL}/delivery/trips/user/${user.id}`
           );
           if (!response.ok) {
             throw new Error("Failed to fetch trips");
@@ -108,7 +108,7 @@ const ProviderDashboard = () => {
     if (window.confirm("Are you sure you want to delete this trip?")) {
       try {
         const response = await fetch(
-          `http://localhost:5000/delivery/deleteTrip/${id}`,
+          `${process.env.REACT_APP_BASEURL}/delivery/deleteTrip/${id}`,
           {
             method: "DELETE",
           }
@@ -132,7 +132,7 @@ const ProviderDashboard = () => {
   const handleUpdateSubmit = async (updatedTrip) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/delivery/updateTrip/${updatedTrip._id}`,
+        `${process.env.REACT_APP_BASEURL}/delivery/updateTrip/${updatedTrip._id}`,
         {
           method: "PUT",
           headers: {

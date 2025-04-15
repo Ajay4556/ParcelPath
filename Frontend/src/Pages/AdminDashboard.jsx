@@ -35,7 +35,7 @@ const AdminDashboard = () => {
     const fetchProviders = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/admin/fetchProviders"
+          `${process.env.REACT_APP_BASEURL}/admin/fetchProviders`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch providers");
@@ -56,7 +56,7 @@ const AdminDashboard = () => {
   const handleVerify = async (id) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/admin/verifyProvider/${id}`,
+        `${process.env.REACT_APP_BASEURL}/admin/verifyProvider/${id}`,
         {
           method: "PUT",
           headers: {
@@ -82,7 +82,7 @@ const AdminDashboard = () => {
   const handleDelete = async (id) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/auth/deleteUser/${id}`,
+        `${process.env.REACT_APP_BASEURL}/auth/deleteUser/${id}`,
         {
           method: "DELETE",
           headers: {
