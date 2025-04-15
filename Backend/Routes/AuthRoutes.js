@@ -13,8 +13,10 @@ import { getUserByEmailController } from "../Controllers/getUserByEmailControlle
 import upload from "../middleware/upload.js";
 import { deleteUserController } from "../Controllers/deleteUserController.js";
 import { submitReview } from "../Controllers/submitReview.js";
-
 dotenv.config();
+
+const frontendUrl = process.env.FRONTEND_BASE_URL;
+
 
 const router = express.Router();
 
@@ -22,6 +24,7 @@ const router = express.Router();
 router.use(
   "/google/*",
   ExpressAuth({
+    baseUrl: process.env.BASE_URL,
     providers: [
       GoogleProvider({
         clientId: process.env.AUTH_GOOGLE_ID,
@@ -71,7 +74,7 @@ router.use(
         }
       },
       redirect: async (url, baseUrl) => {
-        return "http://localhost:3000/dashboard";
+        return `${frontendUrl}/dashboard`;
       },
     },
   })
@@ -129,7 +132,7 @@ router.use(
         }
       },
       redirect: async (url, baseUrl) => {
-        return "http://localhost:3000/dashboard";
+        return `${frontendUrl}/dashboard`;
       },
     },
   })
