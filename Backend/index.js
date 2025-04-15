@@ -22,13 +22,6 @@ app.use(cors({
   origin: allowedOrigins,
   credentials: true, // if using cookies or auth headers
 }));
-// middleware
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-    credentials: true,
-  })
-);
 app.use(express.json());
 
 // connect to the database
