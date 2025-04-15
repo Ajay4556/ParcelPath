@@ -19,7 +19,6 @@ import {
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { FaFacebookF } from "react-icons/fa";
 import { Link } from "react-router";
-import { api } from "../API/api.js";
 import { toast } from "react-toastify";
 import { Helmet } from "react-helmet";
 

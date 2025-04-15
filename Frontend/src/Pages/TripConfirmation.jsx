@@ -8,9 +8,6 @@ import { Helmet } from "react-helmet";
 const TripConfirmation = () => {
   const location = useLocation();
   const { checkout } = location.state.checkoutData || {};
-  const [trip, setTrip] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [daysUntilDropoff, setDaysUntilDropoff] = useState(null);
 
   useEffect(() => {
@@ -23,7 +20,6 @@ const TripConfirmation = () => {
           throw new Error("Failed to fetch trip details");
         }
         const data = await response.json();
-        setTrip(data);
 
         // Calculate the number of days until dropoff
         const dropoffDate = new Date(data.dropoffDate);
@@ -32,9 +28,7 @@ const TripConfirmation = () => {
         const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
         setDaysUntilDropoff(daysDiff);
       } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
+        console.log(error.message);
       }
     };
 

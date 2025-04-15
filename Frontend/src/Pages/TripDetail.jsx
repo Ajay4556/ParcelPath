@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Footer } from "../Shared/Footer";
 import { Navbar } from "../Shared/Navbar";
 import { useNavigate, useParams } from "react-router";
-import { Link } from "react-router";
 import { Helmet } from "react-helmet";
 
 const TripDetail = () => {

@@ -40,7 +40,7 @@ const FindTrip = () => {
       // Then, fetch the trips
       fetchTrips();
     });
-  }, []);
+  });
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;

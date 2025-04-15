@@ -116,7 +116,6 @@ const Checkout = () => {
   });
   const [apiErrors, setApiErrors] = useState(null);
   const [weightError, setWeightError] = useState(null);
-  const [errors, setErrors] = useState({});
   const [userData, setUserData] = useState({});
 
   useEffect(() => {
@@ -195,9 +194,6 @@ const Checkout = () => {
             {weightError && (
               <div className="text-red-500 mb-4">{weightError}</div>
             )}
-            {errors.weight && (
-              <p className="text-red-500 mb-4">{errors.weight}</p>
-            )}
             <p>
               Your Price: ${calculatedPrice.toFixed(2)} (Price per 100 gms:{" "}
               {trip.price}$)
@@ -246,11 +242,6 @@ const Checkout = () => {
                     placeholder="First Name"
                     className="border border-gray-300 p-2 rounded w-full"
                   />
-                  {errors.firstName && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.firstName}
-                    </p>
-                  )}
                 </div>
                 <div>
                   <input
@@ -260,11 +251,6 @@ const Checkout = () => {
                     placeholder="Last Name"
                     className="border border-gray-300 p-2 rounded w-full"
                   />
-                  {errors.lastName && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.lastName}
-                    </p>
-                  )}
                 </div>
               </div>
 
@@ -276,11 +262,6 @@ const Checkout = () => {
                   placeholder="Street Address"
                   className="w-full border border-gray-300 p-2 rounded mb-4"
                 />
-                {errors.address && (
-                  <p className="text-red-500 text-sm mt-1 mb-4">
-                    {errors.address}
-                  </p>
-                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -301,9 +282,6 @@ const Checkout = () => {
                     placeholder="State"
                     className="border border-gray-300 p-2 rounded w-full"
                   />
-                  {errors.state && (
-                    <p className="text-red-500 text-sm mt-1">{errors.state}</p>
-                  )}
                 </div>
                 <div>
                   <input
@@ -313,9 +291,6 @@ const Checkout = () => {
                     placeholder="Zip"
                     className="border border-gray-300 p-2 rounded w-full"
                   />
-                  {errors.zip && (
-                    <p className="text-red-500 text-sm mt-1">{errors.zip}</p>
-                  )}
                 </div>
               </div>
 
@@ -332,11 +307,6 @@ const Checkout = () => {
                     placeholder="First Name"
                     className="border border-gray-300 p-2 rounded w-full"
                   />
-                  {errors.firstName && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.firstName}
-                    </p>
-                  )}
                 </div>
                 <div>
                   <input
@@ -346,11 +316,6 @@ const Checkout = () => {
                     placeholder="Last Name"
                     className="border border-gray-300 p-2 rounded w-full"
                   />
-                  {errors.lastName && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.lastName}
-                    </p>
-                  )}
                 </div>
               </div>
 
@@ -362,11 +327,6 @@ const Checkout = () => {
                   placeholder="Street Address"
                   className="w-full border border-gray-300 p-2 rounded mb-4"
                 />
-                {errors.address && (
-                  <p className="text-red-500 text-sm mt-1 mb-4">
-                    {errors.address}
-                  </p>
-                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -387,9 +347,6 @@ const Checkout = () => {
                     placeholder="State"
                     className="border border-gray-300 p-2 rounded w-full"
                   />
-                  {errors.state && (
-                    <p className="text-red-500 text-sm mt-1">{errors.state}</p>
-                  )}
                 </div>
                 <div>
                   <input
@@ -399,9 +356,6 @@ const Checkout = () => {
                     placeholder="Zip"
                     className="border border-gray-300 p-2 rounded w-full"
                   />
-                  {errors.zip && (
-                    <p className="text-red-500 text-sm mt-1">{errors.zip}</p>
-                  )}
                 </div>
               </div>
             </form>

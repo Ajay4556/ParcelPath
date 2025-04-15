@@ -8,7 +8,6 @@ import { Helmet } from 'react-helmet';
 
 const PostTrip = () => {
   const today = DateTime.local().toISODate(); // Get today's date in local time
-  const [userData, setUserData] = useState({});
 
   const [formData, setFormData] = useState({
     userId: "",
@@ -33,7 +32,6 @@ const PostTrip = () => {
         if (token) {
           const user = await getUserData(); // Assuming this function fetches the user
           if (user && user.id) {
-            setUserData(user);
             setFormData((prevFormData) => ({
               ...prevFormData,
               userId: user.id, // Or user._id if that's the field name

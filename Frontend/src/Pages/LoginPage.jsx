@@ -13,7 +13,6 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { FaFacebookF } from "react-icons/fa";
 import { Link, useNavigate } from "react-router";
 import { api } from "../API/api.js";
-import { Footer } from "../Shared/Footer.jsx";
 import { toast } from "react-toastify";
 import { Helmet } from "react-helmet";
 

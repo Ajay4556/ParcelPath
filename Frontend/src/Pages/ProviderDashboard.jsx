@@ -45,7 +45,6 @@ const AddressModal = ({ addresses, onClose }) => {
 const ProviderDashboard = () => {
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [currentTrip, setCurrentTrip] = useState(null);
   const [userData, setUserData] = useState({});
@@ -99,7 +98,7 @@ const ProviderDashboard = () => {
         }
       }
     } catch (error) {
-      setError(error.message);
+      console.log(error.message);
     } finally {
       setLoading(false);
     }

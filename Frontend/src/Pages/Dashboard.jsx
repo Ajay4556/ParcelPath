@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Navbar } from "../Shared/Navbar";
 import { Footer } from "../Shared/Footer";
 import { api } from "../API/api.js";
-import { Box, Typography } from "@mui/material";
 import { Link, useNavigate } from "react-router";
 import { Helmet } from "react-helmet";
 import {
@@ -12,9 +11,6 @@ import {
 
 const Dashboard = () => {
   const [deliveries, setDeliveries] = useState([]);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState("");
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [userData, setUserData] = useState({});
   const navigate = useNavigate();
 
@@ -39,30 +35,13 @@ const Dashboard = () => {
             console.error("Error fetching Google login data:", error);
           }
         }
-
-        if (userData) {
-          setIsLoggedIn(true);
-          setUserName(userData.fullName || userData.name); // Use fullName or name based on available data
-        } else {
-          setIsLoggedIn(false);
-        }
       } catch (error) {
         console.error("Error checking user status:", error);
-        setIsLoggedIn(false);
       }
     };
 
     checkUserStatus();
   }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    window.location.href = "http://localhost:5000/auth/google/signout";
-  };
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
 
   const getDeliveries = async () => {
     const response = await api.get("/delivery/featured-trips");

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Box, Typography } from "@mui/material";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import { getUserData } from "../components/LoginHandler.js";
 
 export const Navbar = ({ isWhite }) => {
@@ -8,7 +8,6 @@ export const Navbar = ({ isWhite }) => {
   const [userName, setUserName] = useState("");
   const [userData, setUserData] = useState({});
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const navigate = useNavigate();
   useEffect(() => {
     const checkUserStatus = async () => {
       try {

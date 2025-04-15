@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import Modal from "react-modal"; // Import the modal library
 import { Footer } from "../Shared/Footer";
 import { Navbar } from "../Shared/Navbar";
-import { api } from "../API/api";
 import { getUserData } from "../components/LoginHandler";
 import { useNavigate } from "react-router";
 import { Helmet } from "react-helmet";

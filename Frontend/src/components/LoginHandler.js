@@ -1,5 +1,4 @@
 import {jwtDecode} from 'jwt-decode';
-import axios from 'axios';
 import { api } from '../API/api';
 // Create an instance of Axios to manage API requests
 
