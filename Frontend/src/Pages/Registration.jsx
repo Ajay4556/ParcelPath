@@ -270,7 +270,7 @@ const Registration = () => {
                   }}
                   onClick={() => {
                     window.location.href =
-                      "${process.env.REACT_APP_BASEURL}/auth/facebook/signin";
+                      `${process.env.REACT_APP_BASEURL}/auth/facebook/signin`;
                   }}
                   startIcon={
                     <Box

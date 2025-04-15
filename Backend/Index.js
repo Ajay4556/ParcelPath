@@ -7,9 +7,19 @@ import connectDB from "./Config/database.js";
 import cors from "cors";
 dotenv.config();
 
+
 const app = express();
 const port = process.env.PORT || 5000;
 
+const allowedOrigins = [
+  'http://localhost:3000', // for local frontend
+  'https://your-netlify-site.netlify.app' // your deployed frontend
+];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true, // if using cookies or auth headers
+}));
 // middleware
 app.use(
   cors({
