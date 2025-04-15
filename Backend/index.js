@@ -12,8 +12,8 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 const allowedOrigins = [
-  'http://localhost:3000', // for local frontend
-  'https://parcel-path.netlify.app/', // your deployed frontend
+  'http://localhost:3000',
+  'https://parcel-path.netlify.app',
   'https://social-phones-lose.loca.lt',
   'https://twelve-spies-fold.loca.lt'
 ];
