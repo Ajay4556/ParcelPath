@@ -25,7 +25,6 @@ const CustomerDashboard = () => {
         const token = localStorage.getItem("token");
         if (token) {
           const user = await getUserData();
-
           setUserData(user);
           if (user && Object.keys(user).length > 0) {
             const userId = user.id;
@@ -49,7 +48,6 @@ const CustomerDashboard = () => {
     fetchUserTrips();
   }, []);
 
-  // Handle Trip Click for Modal
   const handleTripClick = (trip) => {
     const checkOutInfo = checkOutData.find(
       (data) => data.tripId._id === trip._id
@@ -60,7 +58,6 @@ const CustomerDashboard = () => {
     setShowModal(true);
   };
 
-  // Close Modal
   const closeModal = () => {
     setShowModal(false);
     setSelectedTrip(null);
@@ -68,30 +65,27 @@ const CustomerDashboard = () => {
     setSelectedRating(0);
   };
 
-  // Handle Star Rating
   const handleStarClick = (event, rating) => {
-    event.stopPropagation(); // Prevent event propagation
+    event.stopPropagation();
     setSelectedRating(rating);
   };
 
-  // Submit Review
-  const submitReview = async (event, userId, tripId) => {
-    event.stopPropagation(); // Prevent event propagation
+  const submitReview = async (event, providerId, tripId) => {
+    event.stopPropagation();
     try {
       const response = await api.post(
         `${process.env.REACT_APP_BASEURL}/auth/submitReview`,
         {
-          userId: userId,
+          userId: providerId, // reviewing the provider
           rating: selectedRating,
         }
       );
-      console.log(response.data);
 
       if (response.data.status === "success") {
-        // Store the rating in localStorage
         localStorage.setItem(`tripRating_${tripId}`, selectedRating);
         alert("Review submitted successfully!");
-        closeModal();
+        setSelectedRating(0);
+        setSelectedTrip(null);
       } else {
         alert("Failed to submit review.");
       }
@@ -104,24 +98,6 @@ const CustomerDashboard = () => {
     <div className="min-h-screen flex flex-col">
       <Helmet>
         <title>Customer Dashboard - ParcelPath</title>
-        <meta
-          name="description"
-          content="Manage your current and completed delivery trips with ParcelPath. View trip details, submit reviews, and find new trips easily."
-        />
-        <meta
-          name="keywords"
-          content="ParcelPath, customer dashboard, delivery trips, manage trips, submit reviews, find trips"
-        />
-        <meta property="og:title" content="Customer Dashboard - ParcelPath" />
-        <meta
-          property="og:description"
-          content="Manage your current and completed delivery trips with ParcelPath. View trip details, submit reviews, and find new trips easily."
-        />
-        <meta property="og:image" content="url-to-your-image" />
-        <meta
-          property="og:url"
-          content="http://yourwebsite.com/customer-dashboard"
-        />
       </Helmet>
       <Navbar />
       <main className="flex-grow container mx-auto p-8 mt-10">
@@ -142,7 +118,7 @@ const CustomerDashboard = () => {
           </h2>
           <p className="text-gray-600">Welcome back to Parcelpath!</p>
           <button
-            onClick={(e) => navigate("/findtrip")}
+            onClick={() => navigate("/findtrip")}
             className="bg-orange-500 text-white px-4 py-2 rounded mt-4"
           >
             Find Trips
@@ -200,6 +176,8 @@ const CustomerDashboard = () => {
                 const storedRating = localStorage.getItem(
                   `tripRating_${trip._id}`
                 );
+                const isSelected = selectedTrip?._id === trip._id;
+
                 return (
                   <div
                     key={index}
@@ -225,11 +203,15 @@ const CustomerDashboard = () => {
                       {[1, 2, 3, 4, 5].map((star) => (
                         <span
                           key={star}
-                          onClick={(event) =>
-                            !storedRating && handleStarClick(event, star)
-                          }
+                          onClick={(event) => {
+                            if (!storedRating) {
+                              setSelectedTrip(trip);
+                              handleStarClick(event, star);
+                            }
+                          }}
                           className={`cursor-pointer ${
-                            star <= (storedRating || selectedRating)
+                            star <=
+                            (storedRating || (isSelected ? selectedRating : 0))
                               ? "text-yellow-500"
                               : "text-gray-300"
                           }`}
@@ -237,16 +219,22 @@ const CustomerDashboard = () => {
                           ★
                         </span>
                       ))}
-                      {!storedRating && selectedRating > 0 && (
-                        <button
-                          onClick={(e) => {
-                            submitReview(e, trip.userId, trip._id);
-                          }}
-                          className="ml-2 bg-blue-500 text-white px-2 py-1 rounded"
-                        >
-                          Submit
-                        </button>
-                      )}
+                      {!storedRating &&
+                        isSelected &&
+                        selectedRating > 0 && (
+                          <button
+                            onClick={(e) =>
+                              submitReview(
+                                e,
+                                trip.userId, // service provider ID
+                                trip._id
+                              )
+                            }
+                            className="ml-2 bg-blue-500 text-white px-2 py-1 rounded"
+                          >
+                            Submit
+                          </button>
+                        )}
                     </div>
                   </div>
                 );
@@ -259,7 +247,6 @@ const CustomerDashboard = () => {
       </main>
       <Footer />
 
-      {/* Modal Popup for Trip Details */}
       {showModal && (
         <TripDetailsModal
           trip={selectedTrip}
@@ -271,7 +258,7 @@ const CustomerDashboard = () => {
   );
 };
 
-// Modal Component to Show Trip Details & CheckOut Data
+// Modal Component
 const TripDetailsModal = ({ trip, checkOutInfo, onClose }) => {
   if (!trip || !checkOutInfo) return null;
 
@@ -280,89 +267,85 @@ const TripDetailsModal = ({ trip, checkOutInfo, onClose }) => {
   const isDelivered = dropoffDate < currentDate;
 
   return (
-    <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-        <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg w-full max-w-2xl relative">
-          <button
-            onClick={onClose}
-            className="absolute top-2 right-2 text-gray-600 hover:text-gray-800"
-          >
-            ✖️
-          </button>
-          <h2 className="text-xl font-bold mb-4">Trip & Parcel Details</h2>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg w-full max-w-2xl relative">
+        <button
+          onClick={onClose}
+          className="absolute top-2 right-2 text-gray-600 hover:text-gray-800"
+        >
+          ✖️
+        </button>
+        <h2 className="text-xl font-bold mb-4">Trip & Parcel Details</h2>
+        <p className="mb-2">
+          <strong>Pickup:</strong> {trip.pickupLocation} at {trip.pickupTime} on{" "}
+          {new Date(trip.pickupDate).toLocaleDateString()}
+        </p>
+        <p className="mb-2">
+          <strong>Dropoff:</strong> {trip.dropoffLocations.join(", ")} at{" "}
+          {trip.dropoffTime} on {dropoffDate.toLocaleDateString()}
+        </p>
+        <p className="mb-4">
+          <strong>Status:</strong>{" "}
+          {isDelivered ? (
+            <span className="text-green-500">Delivered</span>
+          ) : (
+            <span className="text-orange-500">
+              Expected on {dropoffDate.toLocaleDateString()} at{" "}
+              {trip.dropoffTime}
+            </span>
+          )}
+        </p>
 
-          {/* Trip Details */}
-          <p className="mb-2">
-            <strong>Pickup:</strong> {trip.pickupLocation} at {trip.pickupTime}{" "}
-            on {new Date(trip.pickupDate).toLocaleDateString()}
-          </p>
-          <p className="mb-2">
-            <strong>Dropoff:</strong> {trip.dropoffLocations.join(", ")} at{" "}
-            {trip.dropoffTime} on {dropoffDate.toLocaleDateString()}
-          </p>
-          <p className="mb-4">
-            <strong>Status:</strong>{" "}
-            {isDelivered ? (
-              <span className="text-green-500">Delivered</span>
-            ) : (
-              <span className="text-orange-500">
-                Expected delivery on {dropoffDate.toLocaleDateString()} at{" "}
-                {trip.dropoffTime}
-              </span>
-            )}
-          </p>
+        {/* Checkout Info */}
+        <h3 className="text-lg font-bold mt-4 mb-2">Checkout Details</h3>
+        <p className="mb-2">
+          <strong>Shipping Name:</strong>{" "}
+          {checkOutInfo.shippingAddress.firstName}{" "}
+          {checkOutInfo.shippingAddress.lastName}
+        </p>
+        <p className="mb-2">
+          <strong>Shipping Address:</strong>{" "}
+          {checkOutInfo.shippingAddress.streetAddress}, Apt{" "}
+          {checkOutInfo.shippingAddress.aptNumber},{" "}
+          {checkOutInfo.shippingAddress.state},{" "}
+          {checkOutInfo.shippingAddress.zip}
+        </p>
+        <p className="mb-2">
+          <strong>Pickup Name:</strong>{" "}
+          {checkOutInfo.pickupAddress.firstName}{" "}
+          {checkOutInfo.pickupAddress.lastName}
+        </p>
+        <p className="mb-2">
+          <strong>Pickup Address:</strong>{" "}
+          {checkOutInfo.pickupAddress.streetAddress}, Apt{" "}
+          {checkOutInfo.pickupAddress.aptNumber},{" "}
+          {checkOutInfo.pickupAddress.state}, {checkOutInfo.pickupAddress.zip}
+        </p>
+        <p className="mb-2">
+          <strong>Parcel Weight:</strong> {checkOutInfo.weight} g
+        </p>
+        <p className="mb-2">
+          <strong>Price Paid:</strong> $
+          {checkOutInfo.calculatedPrice.toFixed(2)}
+        </p>
+        <p className="mb-4">
+          <strong>Checkout Date:</strong>{" "}
+          {new Date(checkOutInfo.createdAt).toLocaleDateString()}
+        </p>
 
-          {/* Parcel & Checkout Data */}
-          <h3 className="text-lg font-bold mt-4 mb-2">Checkout Details</h3>
-          <p className="mb-2">
-            <strong>Shipping Name:</strong>{" "}
-            {checkOutInfo?.shippingAddress?.firstName}{" "}
-            {checkOutInfo.shippingAddress.lastName}
-          </p>
-          <p className="mb-2">
-            <strong>Shipping Address:</strong>{" "}
-            {checkOutInfo.shippingAddress.streetAddress}, Apt{" "}
-            {checkOutInfo.shippingAddress.aptNumber},{" "}
-            {checkOutInfo.shippingAddress.state},{" "}
-            {checkOutInfo.shippingAddress.zip}
-          </p>
-          <p className="mb-2">
-            <strong>Pickup Name:</strong> {checkOutInfo.pickupAddress.firstName}{" "}
-            {checkOutInfo.pickupAddress.lastName}
-          </p>
-          <p className="mb-2">
-            <strong>Pickup Address:</strong>{" "}
-            {checkOutInfo.pickupAddress.streetAddress}, Apt{" "}
-            {checkOutInfo.pickupAddress.aptNumber},{" "}
-            {checkOutInfo.pickupAddress.state}, {checkOutInfo.pickupAddress.zip}
-          </p>
-          <p className="mb-2">
-            <strong>Parcel Weight:</strong> {checkOutInfo.weight} g
-          </p>
-          <p className="mb-2">
-            <strong>Price Paid:</strong> $
-            {checkOutInfo.calculatedPrice.toFixed(2)}
-          </p>
-          <p className="mb-4">
-            <strong>Checkout Date:</strong>{" "}
-            {new Date(checkOutInfo.createdAt).toLocaleDateString()}
-          </p>
-
-          {/* Trip Image */}
-          <img
-            src={trip.image || "profile.jpg"}
-            alt="Parcel"
-            className="w-max h-40 object-cover rounded-md mb-4"
-          />
-          <button
-            onClick={onClose}
-            className="w-full bg-orange-500 text-white py-2 rounded"
-          >
-            Close
-          </button>
-        </div>
+        <img
+          src={trip.image || "profile.jpg"}
+          alt="Parcel"
+          className="w-max h-40 object-cover rounded-md mb-4"
+        />
+        <button
+          onClick={onClose}
+          className="w-full bg-orange-500 text-white py-2 rounded"
+        >
+          Close
+        </button>
       </div>
-    </>
+    </div>
   );
 };
 
